@@ -2,17 +2,17 @@
 ![Donify Banner](./readme_assets/Team_pres.png)
 ***
 # Table of Contents
-1. [Brainstorming and MVP](#Brainstorming-and-MVP)
-    1. [Project Overview](##Project-Overview)
-    2. [Evaluation Criteria](#Evaluation-Criteria)
-    3. [Overall Conclusion](#Overall-Conclusion)
-    4. [Reflection and Ideation Process](#Reflection-and-Ideation-Process)
-    5. [Final Idea](#Final-Idea)
-    6. [MVP Definition](#MVP-Definition)
-    7. [SMART Objectives](#SMART-Objectives)
-    8. [Project Scope](#Project-Scope)
-    9. [Risks and Solutions](#Risks-and-Solutions)
-    10. [Final Conclusion](#Final-Conclusion)
+1. [Brainstorming and MVP](#brainstorming-and-mvp)
+    1. [Project Overview](#project-overview)
+    2. [Evaluation Criteria](#evaluation-criteria)
+    3. [Overall Conclusion](#overall-conclusion)
+    4. [Reflection and Ideation Process](#reflection-and-ideation-process)
+    5. [Final Idea](#final-idea)
+    6. [MVP Definition](#mvp-definition)
+    7. [SMART Objectives](#smart-objectives)
+    8. [Project Scope](#project-scope)
+    9. [Risks and Solutions](#risks-and-solutions)
+    10. [Final Conclusion](#final-conclusion)
 ***
 # Brainstorming and MVP
 ## Project Overview
