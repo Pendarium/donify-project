@@ -3,16 +3,16 @@
 ***
 # Table of Contents
 1. [Brainstorming and MVP](#brainstorming-and-mvp)
-    1. [Project Overview](#project-overview)
-    2. [Evaluation Criteria](#evaluation-criteria)
-    3. [Overall Conclusion](#overall-conclusion)
-    4. [Reflection and Ideation Process](#reflection-and-ideation-process)
-    5. [Final Idea](#final-idea)
-    6. [MVP Definition](#mvp-definition)
-    7. [SMART Objectives](#smart-objectives)
-    8. [Project Scope](#project-scope)
-    9. [Risks and Solutions](#risks-and-solutions)
-    10. [Final Conclusion](#final-conclusion)
+    - [Project Overview](#project-overview)
+    - [Evaluation Criteria](#evaluation-criteria)
+    - [Overall Conclusion](#overall-conclusion)
+    - [Reflection and Ideation Process](#reflection-and-ideation-process)
+    - [Final Idea](#final-idea)
+    - [MVP Definition](#mvp-definition)
+    - [SMART Objectives](#smart-objectives)
+    - [Project Scope](#project-scope)
+    - [Risks and Solutions](#risks-and-solutions)
+    - [Final Conclusion](#final-conclusion)
 ***
 # Brainstorming and MVP
 ## Project Overview
