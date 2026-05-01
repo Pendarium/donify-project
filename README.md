@@ -3,7 +3,7 @@
 ***
 # Table of Contents
 1. [Brainstorming and MVP](#Brainstorming-and-MVP)
-    1. [Project Overview](#Project-Overview)
+    1. [Project Overview](##Project-Overview)
     2. [Evaluation Criteria](#Evaluation-Criteria)
     3. [Overall Conclusion](#Overall-Conclusion)
     4. [Reflection and Ideation Process](#Reflection-and-Ideation-Process)
