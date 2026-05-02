@@ -1,5 +1,17 @@
-# DONNIFY PROJECT
-![Donify Banner](./readme_assets/Team_pres.png)
+<div align="center" style="background-color:#d9d9d9; padding:10px; border-radius:32px;">
+  <img src="./readme_assets/logo-donnify.svg" width="85"/>
+
+  <h1 style="color:black; margin-top:10px;">
+    DONNIFY PROJECT
+  </h1>
+</div>
+
+<div style="height:20px;"></div>
+
+<div align="center">
+  <img src="./readme_assets/Team_pres.png"/>
+</div>
+
 ***
 # Table of Contents
 1. [Brainstorming and MVP](#1-brainstorming-and-mvp)
