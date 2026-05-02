@@ -2,7 +2,7 @@
 ![Donify Banner](./readme_assets/Team_pres.png)
 ***
 # Table of Contents
-1. [Brainstorming and MVP](#brainstorming-and-mvp)
+1. [Brainstorming and MVP](#1-brainstorming-and-mvp)
     - [Project Overview](#project-overview)
     - [Evaluation Criteria](#evaluation-criteria)
     - [Overall Conclusion](#overall-conclusion)
@@ -13,7 +13,7 @@
     - [Project Scope](#project-scope)
     - [Risks and Solutions](#risks-and-solutions)
     - [Final Conclusion](#final-conclusion)
-2. [Project Planning](#project-planning)
+2. [Project Planning](#2-project-planning)
     - [General and Specific Objectives of the Project](#general-and-specific-objectives-of-the-project)
     - [Project Scope](#project-scope)
     - [Key Elements of the Project](#key-elements-of-the-project)
