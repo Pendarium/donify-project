@@ -76,21 +76,23 @@ Web and mobile application
 - Feasible implementation
 ## SMART Objectives
 ### User Registration System
-- Simple account creation for users and organizations.
-### Interactive Map
-- Display nearby organizations and donation locations via geolocation.
-### Leveling System (Core Feature)
-- Users gain experience points through actions; this is the main mechanic of the application.
+- Create a simplified account registration process for users and organizations.
+### Recruitment Dashboard
+- Display organizations, the number of volunteers needed, and the duration of each mission.
+### Certification System
+- Allow users to immediately verify the authenticity and reliability of the association.
 ## Project Scope
-### In Scope (MVP)
+### Within the MVP Scope
 - Simple interface
-- Point system
+- Recruitment dashboard
 - Home page
 - User profile
-- Basic missions and challenges
+- Certification system
+- User reviews and ratings
 ### Out of Scope
-- Real financial donations
-- Reward marketplace
+- Gamification: Experience points and quests
+- Real-money donations
+- Rewards marketplace
 - Global leaderboards
 - Push notifications
 ## Risks and Solutions
