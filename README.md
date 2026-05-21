@@ -203,20 +203,27 @@ The MVP includes both a web and mobile interface. Mockups have been created to v
 #### Main Screens:
 ##### Login / Sign-up Page :
 - Fields: email, password (optional for association accounts: RNA number, association name)
+- USER
+![](./readme_assets/sign_in.png)
+- ASSOCIATION
+![](./readme_assets/sign_in2.png)
 - Buttons: Log In, Sign Up
+![](./readme_assets/acceuil.png)
+
 ##### Organizations Directory :
 - List of the 3 nearest organizations with name, types of donations, and address
-- Access to the interactive map
-##### Interactive Map :
-- Organization locations
-- Ability to click on an organization to view its details
-- Directions indication
+![](./readme_assets/acceuil_fast_travel.png)
+- Access to the volonteers offer
+![](./readme_assets/all_association.png)
+##### volonteers offers :
+- time needs volonteers
+- where needs volonteers
+- who needs volonteers
+![](./readme_assets/all-offer.png)
 ##### User Profile :
 - View of earned rewards
 - Ability to personalize the profile
 - Non-customizable feedback left by associations after time donations
-##### Donor Leaderboard :
-- Top 10 donors
 ##### Association Page :
 - Validation of received donations
 - Non-customizable evaluation of donors for time donations
