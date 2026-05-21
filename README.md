@@ -182,15 +182,18 @@ Donify combines innovation, accessibility, and civic engagement, offering organi
 | ID | Users Stories | Priority |
 |----------|----------|----------|
 |User Stories 1|As a user, I want to be able to create an account.|Must Have|
-|User Stories 2|As a user, I want to be able to access my profile to manage my donations and rewards.|Must Have|
-|User Stories 3|As a user, I want to access the interactive map that locates me so I can find nearby associations.|Must Have|
-|User Stories 4|As a user, I want to receive cosmetic rewards for my donations in order to personalize my profile.|Must Have|
-|User Stories 5|As a user, I want to see the donation leaderboard so I can compare my contribution with other profiles.|Should Have|
-|User Stories 6|As a user, I want to be able to personalize my profile with the premium rewards linked to the leaderboard.|Could Have|
-|User Stories 7|As an association, I want to validate received donations to ensure their compliance.|Must Have|
-|User Stories 8|As an association, I want to give non-customizable feedback on a donor for a time donation to reflect their participation and reliability.|Should Have|
-|User Stories 9|As an administrator, I want to manually certify association accounts that do not meet the automatic certification criteria to ensure their legitimacy.|Must Have|
-|User Stories 10|As an administrator, I want to moderate users and associations to prevent any misconduct or inappropriate behavior.|Must Have|
+|User Stories 2|As a user, I want to be able to access my profile to manage my donations and see my reviews.|Must Have|
+|User Stories 3|As a user, I want to access see certificated badge for associations.|Must Have|
+|User Stories 4|As a user, I want to see all offer for bienveillants by association|Must Have|
+|User Stories 5|As a user, I want to see all review on my user profiles.|Must Have|
+|User Stories 6|As a user, I want to be able to personalize my profile.|Must Have|
+|User Stories 7|As a user, I want to see the donation leaderboard so I can compare my contribution with other profiles.|Should Have|
+|User Stories 8|As a user, I want to be able to personalize my profile with the premium rewards linked to the leaderboard.|Could Have|
+|User Stories 9|As a association, I want to be able to create an account.|Must Have|
+|User Stories 10|As an association, I want to validate received donations to ensure their compliance.|Must Have|
+|User Stories 11|As an association, I want to give non-customizable feedback on a donor for a time donation to reflect their participation and reliability.|must Have|
+|User Stories 12|As an administrator, I want to manually certify association accounts that do not meet the automatic certification criteria to ensure their legitimacy.|Must Have|
+|User Stories 13|As an administrator, I want to moderate users and associations to prevent any misconduct or inappropriate behavior.|Must Have|
 ### Justification of Prioritization :
 - Must Have: Essential features for the MVP (account creation, viewing organizations, interactive map, donation validation, rewards tracking, association certification, moderation).
 - Should Have: Features that enhance user experience and motivation (donor leaderboard, association feedback, premium rewards linked to the leaderboard).
@@ -221,15 +224,15 @@ The MVP includes both a web and mobile interface. Mockups have been created to v
 - Certification of association accounts
 - Moderation of users and associations
 #### User Stories – Mockups Mapping :
-|Mockup / Page|User Stories|Priority|
+| Mockup / Page | User Stories | Priority |
 |----------|----------|----------|
-|Login / Sign-up Page|Users stories 1|Must Have|
-|Organizations Directory|Users stories 3|Must Have|
-|Interactive Map|Users stories 3|Must Have|
-|User Profile|Users stories 2 / 4 / 6|Must Have / Could Have|
-|Donor Leaderboard|Users stories 5|Should Have|
-|Association Page|Users stories 7 / 8|Must Have / Should Have|
-|Administrator Page|Users stories 9 / 10|Must Have|
+| Login / Sign-up Page | User Stories 1 / 9 | Must Have |
+| Organizations Directory | User Stories 3 / 4 | Must Have |
+| Interactive Map | User Stories 3 | Must Have |
+| User Profile | User Stories 2 / 5 / 6 / 8 | Must Have / Could Have |
+| Donor Leaderboard | User Stories 7 / 8 | Should Have / Could Have |
+| Association Page | User Stories 10 / 11 | Must Have |
+| Administrator Page | User Stories 12 / 13 | Must Have |
 ## System Architecture
 ![Architecture diagram](./readme_assets/architectur_diagram.png)
 ## Components, Classes, and Database Design
