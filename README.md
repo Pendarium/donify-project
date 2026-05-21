@@ -184,7 +184,7 @@ Donify combines innovation, accessibility, and civic engagement, offering organi
 |User Stories 1|As a user, I want to be able to create an account.|Must Have|
 |User Stories 2|As a user, I want to be able to access my profile to manage my donations and see my reviews.|Must Have|
 |User Stories 3|As a user, I want to access see certificated badge for associations.|Must Have|
-|User Stories 4|As a user, I want to see all offer for bienveillants by association|Must Have|
+|User Stories 4|As a user, I want to see all offer for volonteers by association|Must Have|
 |User Stories 5|As a user, I want to see all review on my user profiles.|Must Have|
 |User Stories 6|As a user, I want to be able to personalize my profile.|Must Have|
 |User Stories 7|As a user, I want to see the donation leaderboard so I can compare my contribution with other profiles.|Should Have|
