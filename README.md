@@ -881,7 +881,11 @@ Main database entities:
 | One Association → Many Reviews | One-to-Many |
 
 # High-Level Sequence Diagrams
+## Architectural diagram
 ![High-Level Sequence Diagrams](./readme_assets/High-Level_Sequence_Diagrams.png)
+
+## Sequence diagram
+![High-Level Sequence Diagrams](./readme_assets/Sequence_diagram.png)
 
 # External and Internal APIs Documentation
 
