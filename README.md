@@ -1,3 +1,50 @@
+# Donnify
+
+Donnify is a social-impact platform designed to increase the visibility of charitable associations and simplify volunteering and donation participation.
+
+## What this project includes
+
+- A clear MVP vision around association visibility, volunteer offers, and community engagement
+- A NestJS backend with Prisma and PostgreSQL support
+- A professional project structure and setup documentation for the next development phase
+
+## Project structure
+
+- backend/: NestJS API and Prisma configuration
+- readme_assets/: presentation visuals and project assets
+
+## Quick start
+
+1. Install backend dependencies:
+   ```bash
+   cd backend
+   npm install
+   cp .env.example .env
+   npm run db:generate
+   npm run db:migrate
+   npm run dev
+   ```
+2. Open the API at http://localhost:3000/api.
+
+Alternative from repository root:
+
+```bash
+npm run backend:install
+cp backend/.env.example backend/.env
+npm run backend:db:generate
+npm run backend:db:migrate
+npm run dev
+```
+
+Troubleshooting:
+
+- If you see `npm error Missing script: "dev"`, you are launching commands from the repository root without root scripts. Use `cd backend` first, or use the root scripts above.
+- Ensure PostgreSQL is running and `DATABASE_URL` in `.env` points to a reachable database.
+
+## Documentation
+
+The detailed planning and MVP notes are still available in this document below. The backend guide is available in [backend/README.md](backend/README.md).
+
 ![Team Presentation](./readme_assets/Team_pres.png)
 
 ---
