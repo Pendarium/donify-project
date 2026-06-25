@@ -73,12 +73,14 @@ export default function AuthPage({ token, role, onRegister, onLogin, onLogout, o
             )}
             <input value={regEmail} onChange={(e) => setRegEmail(e.target.value)} type="email" placeholder="Email" required />
             {signupType === 'association' && (
-              <input
-                value={regRnaNumber}
-                onChange={(e) => setRegRnaNumber(e.target.value)}
-                placeholder="Numero RNA"
-                required
-              />
+              <div className="auth-field-group">
+                <input
+                  value={regRnaNumber}
+                  onChange={(e) => setRegRnaNumber(e.target.value)}
+                  placeholder="Numero SIREN"
+                  required
+                />
+              </div>
             )}
             <input value={regPassword} onChange={(e) => setRegPassword(e.target.value)} type="password" placeholder="Mot de passe" required />
             <button className="solid" type="submit">

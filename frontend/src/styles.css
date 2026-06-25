@@ -631,6 +631,17 @@ form button {
   flex: 1;
 }
 
+.auth-field-group {
+  display: grid;
+  gap: 4px;
+}
+
+.auth-hint {
+  color: #4f6f76;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
 .profile-card {
   padding: 20px;
 }
@@ -856,6 +867,25 @@ form button {
 
 .modal-close {
   flex: 0 0 auto;
+}
+
+.modal-form {
+  display: grid;
+  gap: 12px;
+}
+
+.modal-form label {
+  display: grid;
+  gap: 4px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #2d5560;
+}
+
+.modal-form input,
+.modal-form textarea {
+  font-size: 1rem;
+  background: #f3fafb;
 }
 
 .association-reviews-grid {

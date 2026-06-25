@@ -12,6 +12,9 @@ export default function OffersPage({
   onToggleFavorite,
   applicationIds = [],
   onSubmitApplication,
+  onCreateOffer,
+  onValidateApplication,
+  onDeleteOffer,
 }) {
   const [searchParams] = useSearchParams();
   const [city, setCity] = useState(searchParams.get('city') || '');
@@ -19,6 +22,20 @@ export default function OffersPage({
   const [urgentOnly, setUrgentOnly] = useState(false);
   const [applicationDrafts, setApplicationDrafts] = useState({});
   const [activeApplicationOfferId, setActiveApplicationOfferId] = useState(null);
+  const [activeCandidatesOfferId, setActiveCandidatesOfferId] = useState(null);
+  const [validatingApplicationId, setValidatingApplicationId] = useState(null);
+  const [deletingOfferId, setDeletingOfferId] = useState(null);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const emptyForm = {
+    title: '',
+    description: '',
+    location: '',
+    missionDate: '',
+    durationHours: '2',
+    volunteersNeeded: '1',
+    isUrgent: false,
+  };
+  const [createDraft, setCreateDraft] = useState(emptyForm);
 
   useEffect(() => {
     onLoadOffers(city);
@@ -29,7 +46,7 @@ export default function OffersPage({
       const text = `${offer.title} ${offer.description} ${offer.location}`.toLowerCase();
       const matchesChip =
         activeChip === 'Toutes' ? true : text.includes(activeChip.toLowerCase().replace('aide ', ''));
-      const isUrgent = /urgent|urgence/i.test(offer.title + ' ' + offer.description);
+      const isUrgent = Boolean(offer.isUrgent) || /urgent|urgence/i.test(offer.title + ' ' + offer.description);
       const matchesUrgent = urgentOnly ? isUrgent : true;
       return matchesChip && matchesUrgent;
     });
@@ -40,6 +57,10 @@ export default function OffersPage({
   const closeApplicationModal = () => setActiveApplicationOfferId(null);
 
   const handleOpenApplication = (offerId) => {
+    if (role !== 'user') {
+      return;
+    }
+
     if (applicationIds.includes(offerId)) {
       return;
     }
@@ -56,12 +77,78 @@ export default function OffersPage({
     closeApplicationModal();
   };
 
+  const handleCreateFieldChange = (e) => {
+    const { checked, name, type, value } = e.target;
+    setCreateDraft((prev) => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
+  };
+
+  const handleSubmitCreate = async () => {
+    const startDate = new Date(createDraft.missionDate);
+    const durationHours = Number(createDraft.durationHours);
+    const volunteersNeeded = Number(createDraft.volunteersNeeded);
+
+    if (
+      Number.isNaN(startDate.getTime())
+      || !Number.isInteger(durationHours)
+      || durationHours < 1
+      || !Number.isInteger(volunteersNeeded)
+      || volunteersNeeded < 1
+    ) {
+      return;
+    }
+
+    const endDate = new Date(startDate.getTime() + (durationHours * 60 * 60 * 1000));
+
+    await onCreateOffer?.({
+      title: createDraft.title,
+      description: createDraft.description,
+      location: createDraft.location,
+      startDate: startDate.toISOString(),
+      endDate: endDate.toISOString(),
+      durationHours,
+      volunteersNeeded,
+      isUrgent: Boolean(createDraft.isUrgent),
+    });
+    setCreateDraft(emptyForm);
+    setShowCreateModal(false);
+  };
+
+  const handleValidateApplication = async (applicationId) => {
+    if (!applicationId || validatingApplicationId) {
+      return;
+    }
+
+    setValidatingApplicationId(applicationId);
+    await onValidateApplication?.(applicationId);
+    setValidatingApplicationId(null);
+  };
+
+  const handleDeleteOffer = async (offerId) => {
+    if (!offerId || deletingOfferId) {
+      return;
+    }
+
+    const confirmed = window.confirm('Confirmer la suppression de cette offre ?');
+    if (!confirmed) {
+      return;
+    }
+
+    setDeletingOfferId(offerId);
+    await onDeleteOffer?.(offerId);
+    setDeletingOfferId(null);
+  };
+
   return (
     <section className="page-block">
       <div className="section-header-block">
         <p className="kicker">BENEVOLAT</p>
         <h2>Offres de benevolat</h2>
         <p>{filtered.length} missions disponibles</p>
+        {isAuthenticated && role === 'association' && (
+          <button className="solid" type="button" onClick={() => setShowCreateModal(true)}>
+            + Creer une offre
+          </button>
+        )}
       </div>
 
       <div className="search card">
@@ -100,7 +187,7 @@ export default function OffersPage({
             <div className="offer-head">
               <div className="offer-head-meta">
                 <span className="badge">{offer.location}</span>
-                {/urgent|urgence/i.test(offer.title + ' ' + offer.description) && <span className="badge warning">Urgent</span>}
+                {(Boolean(offer.isUrgent) || /urgent|urgence/i.test(offer.title + ' ' + offer.description)) && <span className="badge warning">Urgent</span>}
               </div>
               {isAuthenticated && role === 'user' && (
                 <button
@@ -119,19 +206,70 @@ export default function OffersPage({
             <small>
               {new Date(offer.startDate).toLocaleDateString()} - {new Date(offer.endDate).toLocaleDateString()}
             </small>
+            <p className="offer-meta-line">Duree: {offer.durationHours || '-'} h</p>
+            <p className="offer-meta-line">Benevoles necessaires: {offer.volunteersNeeded || '-'}</p>
             <p className="offer-meta-line">
-              Association: <Link className="inline-link" to={`/associations/${offer.associationId}`}>{offer.association?.name || 'Association'}</Link>
+              Association: {role === 'association'
+                ? 'Votre association'
+                : <Link className="inline-link" to={`/associations/${offer.associationId}`}>{offer.association?.name || 'Association'}</Link>}
             </p>
-            <div className="actions-row">
-              <button
-                className={applicationIds.includes(offer.id) ? 'solid action-link active-outline' : 'solid action-link'}
-                type="button"
-                disabled={applicationIds.includes(offer.id)}
-                onClick={() => handleOpenApplication(offer.id)}
-              >
-                {applicationIds.includes(offer.id) ? 'Candidature envoyee' : 'Postuler'}
-              </button>
-            </div>
+            {role === 'user' && (
+              <div className="actions-row">
+                <button
+                  className={applicationIds.includes(offer.id) ? 'solid action-link active-outline' : 'solid action-link'}
+                  type="button"
+                  disabled={applicationIds.includes(offer.id)}
+                  onClick={() => handleOpenApplication(offer.id)}
+                >
+                  {applicationIds.includes(offer.id) ? 'Candidature envoyee' : 'Postuler'}
+                </button>
+              </div>
+            )}
+            {role === 'association' && (
+              <>
+                <div className="actions-row">
+                  <button
+                    className={activeCandidatesOfferId === offer.id ? 'solid action-link active-outline' : 'solid action-link'}
+                    type="button"
+                    onClick={() => setActiveCandidatesOfferId((prev) => (prev === offer.id ? null : offer.id))}
+                  >
+                    Candidatures ({(offer.applications || []).length})
+                  </button>
+                  <button
+                    className="danger action-link"
+                    type="button"
+                    disabled={deletingOfferId === offer.id}
+                    onClick={() => handleDeleteOffer(offer.id)}
+                  >
+                    {deletingOfferId === offer.id ? 'Suppression...' : "Supprimer l'offre"}
+                  </button>
+                </div>
+
+                {activeCandidatesOfferId === offer.id && (
+                  <div className="detail-stack">
+                    {(offer.applications || []).length ? (offer.applications || []).map((application) => (
+                      <div className="application-card" key={application.id}>
+                        <div className="offer-head">
+                          <span className="badge">{application.user?.username || 'Benevole'}</span>
+                          <span className="badge">{new Date(application.createdAt).toLocaleDateString()}</span>
+                        </div>
+                        <p>{application.message || 'Aucun message joint a cette candidature.'}</p>
+                        <div className="actions-row">
+                          <button
+                            className="solid action-link"
+                            type="button"
+                            disabled={validatingApplicationId === application.id}
+                            onClick={() => handleValidateApplication(application.id)}
+                          >
+                            {validatingApplicationId === application.id ? 'Validation...' : 'Valider participation'}
+                          </button>
+                        </div>
+                      </div>
+                    )) : <p className="muted">Aucune candidature pour cette offre pour le moment.</p>}
+                  </div>
+                )}
+              </>
+            )}
           </article>
         ))}
       </div>
@@ -178,6 +316,125 @@ export default function OffersPage({
                 </button>
                 <button className="solid" type="button" onClick={handleSubmitActiveApplication}>
                   Envoyer la candidature
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isAuthenticated && role === 'association' && showCreateModal && (
+        <div className="modal-backdrop" role="presentation" onClick={() => setShowCreateModal(false)}>
+          <div
+            className="modal-card card"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="create-offer-modal-title"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="modal-header">
+              <div>
+                <p className="kicker">ASSOCIATION</p>
+                <h3 id="create-offer-modal-title">Nouvelle offre de benevolat</h3>
+              </div>
+              <button className="ghost modal-close" type="button" onClick={() => setShowCreateModal(false)}>
+                Fermer
+              </button>
+            </div>
+
+            <div className="modal-form">
+              <label>
+                Titre
+                <input
+                  name="title"
+                  value={createDraft.title}
+                  onChange={handleCreateFieldChange}
+                  placeholder="Titre de la mission"
+                  maxLength={120}
+                />
+              </label>
+              <label>
+                Description
+                <textarea
+                  className="modal-textarea"
+                  name="description"
+                  value={createDraft.description}
+                  onChange={handleCreateFieldChange}
+                  placeholder="Decrivez la mission..."
+                  maxLength={600}
+                  rows={4}
+                />
+              </label>
+              <label>
+                Ville / lieu
+                <input
+                  name="location"
+                  value={createDraft.location}
+                  onChange={handleCreateFieldChange}
+                  placeholder="Paris, Lyon..."
+                />
+              </label>
+              <label>
+                Date de mission
+                <input
+                  name="missionDate"
+                  type="date"
+                  value={createDraft.missionDate}
+                  onChange={handleCreateFieldChange}
+                />
+              </label>
+              <label>
+                Duree (heures)
+                <input
+                  name="durationHours"
+                  type="number"
+                  min={1}
+                  value={createDraft.durationHours}
+                  onChange={handleCreateFieldChange}
+                />
+              </label>
+              <label>
+                Nombre de benevoles necessaires
+                <input
+                  name="volunteersNeeded"
+                  type="number"
+                  min={1}
+                  value={createDraft.volunteersNeeded}
+                  onChange={handleCreateFieldChange}
+                />
+              </label>
+              <label>
+                <input
+                  name="isUrgent"
+                  type="checkbox"
+                  checked={Boolean(createDraft.isUrgent)}
+                  onChange={handleCreateFieldChange}
+                />
+                Mission urgente
+              </label>
+            </div>
+
+            <div className="modal-footer">
+              <div className="modal-actions">
+                <button className="ghost" type="button" onClick={() => setShowCreateModal(false)}>
+                  Annuler
+                </button>
+                <button
+                  className="solid"
+                  type="button"
+                  disabled={
+                    !createDraft.title
+                    || !createDraft.description
+                    || !createDraft.location
+                    || !createDraft.missionDate
+                    || !Number.isInteger(Number(createDraft.durationHours))
+                    || Number(createDraft.durationHours) < 1
+                    || !Number.isInteger(Number(createDraft.volunteersNeeded))
+                    || Number(createDraft.volunteersNeeded) < 1
+                  }
+                  onClick={handleSubmitCreate}
+                >
+                  Publier l'offre
                 </button>
               </div>
             </div>

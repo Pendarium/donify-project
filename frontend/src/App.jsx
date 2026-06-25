@@ -136,6 +136,21 @@ export default function App() {
 
   const loadOffers = async (city = '') => {
     try {
+      if (role === 'association') {
+        const associationProfile = await api('/users/profile');
+        setProfile(associationProfile || null);
+
+        const associationOffers = associationProfile?.managedAssociation?.offers || [];
+        const normalizedCity = city.trim().toLowerCase();
+        const items = normalizedCity
+          ? associationOffers.filter((offer) => (offer.location || '').toLowerCase().includes(normalizedCity))
+          : associationOffers;
+
+        setOffers(items);
+        setOk(`Vos offres chargees: ${items.length}`);
+        return;
+      }
+
       const query = city.trim() ? `?city=${encodeURIComponent(city.trim())}` : '';
       const data = await api(`/volunteer-offers${query}`);
       const items = Array.isArray(data) ? data : data.data || [];
@@ -206,6 +221,49 @@ export default function App() {
     }
   };
 
+  const validateApplicationParticipation = async (applicationId) => {
+    try {
+      await api(`/users/applications/${applicationId}/validate`, {
+        method: 'POST',
+        body: JSON.stringify({}),
+      });
+      await loadOffers();
+      setOk('Participation validee');
+    } catch (error) {
+      setErr(`Validation candidature KO: ${error.message}`);
+    }
+  };
+
+  const createOffer = async (offerData) => {
+    try {
+      const associationId = profile?.managedAssociation?.id;
+      if (!associationId) {
+        setErr('Aucune association liee a votre compte');
+        return;
+      }
+      await api('/volunteer-offers', {
+        method: 'POST',
+        body: JSON.stringify({ ...offerData, associationId }),
+      });
+      await loadOffers();
+      setOk('Offre de benevolat creee');
+    } catch (error) {
+      setErr(`Creation offre KO: ${error.message}`);
+    }
+  };
+
+  const deleteOffer = async (offerId) => {
+    try {
+      await api(`/volunteer-offers/${offerId}`, {
+        method: 'DELETE',
+      });
+      await loadOffers();
+      setOk('Offre supprimee');
+    } catch (error) {
+      setErr(`Suppression offre KO: ${error.message}`);
+    }
+  };
+
   return (
     <AppLayout
       isAuthenticated={isAuthenticated}
@@ -245,6 +303,9 @@ export default function App() {
                 onToggleFavorite={toggleFavorite}
                 applicationIds={applications.map((application) => application.offerId)}
                 onSubmitApplication={submitApplication}
+                onCreateOffer={createOffer}
+                onValidateApplication={validateApplicationParticipation}
+                onDeleteOffer={deleteOffer}
               />
             )
             : <Navigate to="/" replace />}
