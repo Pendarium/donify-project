@@ -1,6 +1,9 @@
 import { useMemo, useState } from 'react';
+import { useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 
 export default function AuthPage({ token, role, onRegister, onLogin, onLogout, onProfile, mode = 'login' }) {
+  const location = useLocation();
   const [regUsername, setRegUsername] = useState('');
   const [regAssociationName, setRegAssociationName] = useState('');
   const [regEmail, setRegEmail] = useState('');
@@ -12,6 +15,18 @@ export default function AuthPage({ token, role, onRegister, onLogin, onLogout, o
   const [loginPassword, setLoginPassword] = useState('');
 
   const isSignUp = mode === 'signup';
+
+  useEffect(() => {
+    // Keep auth forms empty whenever user lands on login/signup routes.
+    setRegUsername('');
+    setRegAssociationName('');
+    setRegEmail('');
+    setRegPassword('');
+    setRegRnaNumber('');
+    setSignupType('user');
+    setLoginIdentifier('');
+    setLoginPassword('');
+  }, [location.key, mode]);
 
   const tokenPreview = useMemo(() => {
     if (!token) return 'Aucun token';

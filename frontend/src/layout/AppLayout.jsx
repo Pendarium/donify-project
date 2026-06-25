@@ -30,8 +30,8 @@ export default function AppLayout({ children, isAuthenticated, role, onGoLogin, 
               <NavLink to="/favoris" className={({ isActive }) => (isActive ? 'menu-item active' : 'menu-item')}>
                 Mes favoris
               </NavLink>
-              <NavLink to="/historique" className={({ isActive }) => (isActive ? 'menu-item active' : 'menu-item')}>
-                Historique
+              <NavLink to="/calendrier" className={({ isActive }) => (isActive ? 'menu-item active' : 'menu-item')}>
+                Calendrier
               </NavLink>
             </>
           )}

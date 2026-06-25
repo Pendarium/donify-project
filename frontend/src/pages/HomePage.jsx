@@ -7,7 +7,7 @@ const stats = [
 const guestHighlights = [
   'Acceder aux fiches associations et a leurs missions',
   'Enregistrer des offres dans vos favoris',
-  'Retrouver votre historique benevole dans un espace dedie',
+  'Retrouver votre calendrier benevole dans un espace dedie',
 ];
 
 export default function HomePage({ isAuthenticated = false, onGoLogin, onGoSignup }) {

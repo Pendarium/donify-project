@@ -23,6 +23,7 @@ export default function OffersPage({
   const [applicationDrafts, setApplicationDrafts] = useState({});
   const [activeApplicationOfferId, setActiveApplicationOfferId] = useState(null);
   const [activeCandidatesOfferId, setActiveCandidatesOfferId] = useState(null);
+  const [activeAcceptedOfferId, setActiveAcceptedOfferId] = useState(null);
   const [validatingApplicationId, setValidatingApplicationId] = useState(null);
   const [deletingOfferId, setDeletingOfferId] = useState(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -54,10 +55,30 @@ export default function OffersPage({
 
   const activeApplicationOffer = filtered.find((offer) => offer.id === activeApplicationOfferId) || null;
 
-  const closeApplicationModal = () => setActiveApplicationOfferId(null);
+  const closeApplicationModal = () => {
+    if (activeApplicationOfferId) {
+      setApplicationDrafts((prev) => {
+        const next = { ...prev };
+        delete next[activeApplicationOfferId];
+        return next;
+      });
+    }
+
+    setActiveApplicationOfferId(null);
+  };
+
+  const closeCreateModal = () => {
+    setCreateDraft(emptyForm);
+    setShowCreateModal(false);
+  };
 
   const handleOpenApplication = (offerId) => {
     if (role !== 'user') {
+      return;
+    }
+
+    const offer = filtered.find((item) => item.id === offerId);
+    if ((offer?.volunteersNeeded || 0) < 1) {
       return;
     }
 
@@ -109,8 +130,7 @@ export default function OffersPage({
       volunteersNeeded,
       isUrgent: Boolean(createDraft.isUrgent),
     });
-    setCreateDraft(emptyForm);
-    setShowCreateModal(false);
+    closeCreateModal();
   };
 
   const handleValidateApplication = async (applicationId) => {
@@ -215,14 +235,22 @@ export default function OffersPage({
             </p>
             {role === 'user' && (
               <div className="actions-row">
-                <button
-                  className={applicationIds.includes(offer.id) ? 'solid action-link active-outline' : 'solid action-link'}
-                  type="button"
-                  disabled={applicationIds.includes(offer.id)}
-                  onClick={() => handleOpenApplication(offer.id)}
-                >
-                  {applicationIds.includes(offer.id) ? 'Candidature envoyee' : 'Postuler'}
-                </button>
+                {(() => {
+                  const isFull = (offer.volunteersNeeded || 0) < 1;
+                  const alreadyApplied = applicationIds.includes(offer.id);
+                  const disabled = isFull || alreadyApplied;
+
+                  return (
+                    <button
+                      className={disabled ? 'solid action-link active-outline' : 'solid action-link'}
+                      type="button"
+                      disabled={disabled}
+                      onClick={() => handleOpenApplication(offer.id)}
+                    >
+                      {isFull ? 'Complet' : alreadyApplied ? 'Candidature envoyee' : 'Postuler'}
+                    </button>
+                  );
+                })()}
               </div>
             )}
             {role === 'association' && (
@@ -234,6 +262,13 @@ export default function OffersPage({
                     onClick={() => setActiveCandidatesOfferId((prev) => (prev === offer.id ? null : offer.id))}
                   >
                     Candidatures ({(offer.applications || []).length})
+                  </button>
+                  <button
+                    className={activeAcceptedOfferId === offer.id ? 'solid action-link active-outline' : 'solid action-link'}
+                    type="button"
+                    onClick={() => setActiveAcceptedOfferId((prev) => (prev === offer.id ? null : offer.id))}
+                  >
+                    Acceptes ({(offer.historyUsers || []).length})
                   </button>
                   <button
                     className="danger action-link"
@@ -266,6 +301,20 @@ export default function OffersPage({
                         </div>
                       </div>
                     )) : <p className="muted">Aucune candidature pour cette offre pour le moment.</p>}
+                  </div>
+                )}
+
+                {activeAcceptedOfferId === offer.id && (
+                  <div className="detail-stack">
+                    {(offer.historyUsers || []).length ? (offer.historyUsers || []).map((entry) => (
+                      <div className="application-card" key={entry.id}>
+                        <div className="offer-head">
+                          <span className="badge">{entry.user?.username || 'Benevole'}</span>
+                          <span className="badge">Valide le {new Date(entry.completedAt).toLocaleDateString()}</span>
+                        </div>
+                        <p>{entry.note || 'Participation validee sans note.'}</p>
+                      </div>
+                    )) : <p className="muted">Aucun benevole valide pour cette offre pour le moment.</p>}
                   </div>
                 )}
               </>
@@ -324,9 +373,9 @@ export default function OffersPage({
       )}
 
       {isAuthenticated && role === 'association' && showCreateModal && (
-        <div className="modal-backdrop" role="presentation" onClick={() => setShowCreateModal(false)}>
+        <div className="modal-backdrop" role="presentation" onClick={closeCreateModal}>
           <div
-            className="modal-card card"
+            className="modal-card card create-offer-modal"
             role="dialog"
             aria-modal="true"
             aria-labelledby="create-offer-modal-title"
@@ -337,7 +386,7 @@ export default function OffersPage({
                 <p className="kicker">ASSOCIATION</p>
                 <h3 id="create-offer-modal-title">Nouvelle offre de benevolat</h3>
               </div>
-              <button className="ghost modal-close" type="button" onClick={() => setShowCreateModal(false)}>
+              <button className="ghost modal-close" type="button" onClick={closeCreateModal}>
                 Fermer
               </button>
             </div>
@@ -403,7 +452,7 @@ export default function OffersPage({
                   onChange={handleCreateFieldChange}
                 />
               </label>
-              <label>
+              <label className="modal-checkbox-row">
                 <input
                   name="isUrgent"
                   type="checkbox"
@@ -416,7 +465,7 @@ export default function OffersPage({
 
             <div className="modal-footer">
               <div className="modal-actions">
-                <button className="ghost" type="button" onClick={() => setShowCreateModal(false)}>
+                <button className="ghost" type="button" onClick={closeCreateModal}>
                   Annuler
                 </button>
                 <button

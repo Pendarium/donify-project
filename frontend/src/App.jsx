@@ -19,6 +19,7 @@ export default function App() {
   const [offers, setOffers] = useState([]);
   const [favorites, setFavorites] = useState([]);
   const [history, setHistory] = useState([]);
+  const [bookings, setBookings] = useState([]);
   const [applications, setApplications] = useState([]);
   const [profile, setProfile] = useState(null);
 
@@ -29,12 +30,14 @@ export default function App() {
     if (!token || role !== 'user') {
       setFavorites([]);
       setHistory([]);
+      setBookings([]);
       setApplications([]);
       return;
     }
 
     loadFavorites();
     loadHistory();
+    loadBookings();
     loadApplications();
   }, [token, role]);
 
@@ -83,6 +86,7 @@ export default function App() {
     setProfile(null);
     setFavorites([]);
     setHistory([]);
+    setBookings([]);
     setApplications([]);
     setOk('Logout effectue');
     navigate('/');
@@ -191,9 +195,44 @@ export default function App() {
       const data = await api('/users/history');
       const items = Array.isArray(data) ? data : data.data || [];
       setHistory(items);
-      setOk(`Historique charge: ${items.length}`);
+      setOk(`Calendrier charge: ${items.length} mission(s) validee(s)`);
     } catch (error) {
-      setErr(`Historique KO: ${error.message}`);
+      setErr(`Calendrier KO: ${error.message}`);
+    }
+  };
+
+  const loadBookings = async () => {
+    try {
+      const data = await api('/users/bookings');
+      const items = Array.isArray(data) ? data : data.data || [];
+      setBookings(items);
+    } catch (error) {
+      setErr(`Calendrier KO: ${error.message}`);
+    }
+  };
+
+  const createBooking = async (payload) => {
+    try {
+      const created = await api('/users/bookings', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+      setBookings((prev) => [created, ...prev]);
+      setOk('Booking ajoute au calendrier');
+    } catch (error) {
+      setErr(`Ajout booking KO: ${error.message}`);
+    }
+  };
+
+  const deleteBooking = async (bookingId) => {
+    try {
+      await api(`/users/bookings/${bookingId}`, {
+        method: 'DELETE',
+      });
+      setBookings((prev) => prev.filter((item) => item.id !== bookingId));
+      setOk('Booking supprime');
+    } catch (error) {
+      setErr(`Suppression booking KO: ${error.message}`);
     }
   };
 
@@ -317,11 +356,19 @@ export default function App() {
             : <Navigate to="/" replace />}
         />
         <Route
-          path="/historique"
+          path="/calendrier"
           element={isAuthenticated && role === 'user'
-            ? <HistoryPage history={history} onLoadHistory={loadHistory} />
+            ? <HistoryPage
+              history={history}
+              bookings={bookings}
+              onLoadHistory={loadHistory}
+              onLoadBookings={loadBookings}
+              onCreateBooking={createBooking}
+              onDeleteBooking={deleteBooking}
+            />
             : <Navigate to="/" replace />}
         />
+        <Route path="/historique" element={<Navigate to="/calendrier" replace />} />
         <Route
           path="/auth/login"
           element={(
