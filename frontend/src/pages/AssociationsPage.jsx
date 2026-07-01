@@ -75,7 +75,6 @@ export default function AssociationsPage({ associations, onLoadAssociations }) {
                   {a.name}
                 </Link>
               </h3>
-              {!a.isCertified && <span className="badge warning">Urgent</span>}
             </div>
             <p>{a.description || 'Association engagee localement.'}</p>
             <small>{a.address}</small>

@@ -8,10 +8,11 @@ function formatDate(dateValue) {
   return date.toLocaleDateString();
 }
 
-export default function ProfilePage({ profile, onLoadProfile, onSaveProfile }) {
+export default function ProfilePage({ profile, onLoadProfile, onSaveProfile, onDeleteAccount }) {
   const [isEditing, setIsEditing] = useState(false);
   const [associationTab, setAssociationTab] = useState('infos');
   const [isEditingAssociation, setIsEditingAssociation] = useState(false);
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
   const [associationForm, setAssociationForm] = useState({
     name: '',
     description: '',
@@ -84,6 +85,24 @@ export default function ProfilePage({ profile, onLoadProfile, onSaveProfile }) {
     return trimmed.length > 0 ? trimmed : undefined;
   };
 
+  const handleDeleteAccount = async () => {
+    if (isDeletingAccount) {
+      return;
+    }
+
+    const confirmed = window.confirm('Cette action est irreversible. Voulez-vous vraiment supprimer votre compte ?');
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      setIsDeletingAccount(true);
+      await onDeleteAccount();
+    } finally {
+      setIsDeletingAccount(false);
+    }
+  };
+
   if (profile?.role === 'association') {
     const volunteerReviews = managedAssociation?.userReviewsAuthored ?? [];
     const associationOffers = managedAssociation?.offers ?? [];
@@ -106,17 +125,14 @@ export default function ProfilePage({ profile, onLoadProfile, onSaveProfile }) {
         <div className="section-header-block">
           <p className="kicker">ESPACE ASSOCIATION</p>
           <h2>{managedAssociation?.name || profile.username}</h2>
-          <p>Pilotez votre presence Donnify, vos missions et la confiance de vos benevoles.</p>
+          <p>Pilotez votre profil Donnify et vos missions.</p>
         </div>
 
         <article className="card association-profile-hero">
           <div>
             <div className="chips-inline">
               <span className="badge">Compte association</span>
-              {managedAssociation?.rnaNumber && <span className="badge">RNA {managedAssociation.rnaNumber}</span>}
-              <span className={managedAssociation?.isCertified ? 'badge success' : 'badge warning'}>
-                {managedAssociation?.isCertified ? 'Association verifiee' : 'Verification en attente'}
-              </span>
+              {managedAssociation?.rnaNumber && <span className="badge">SIREN {managedAssociation.rnaNumber}</span>}
             </div>
             <p className="association-profile-copy">
               {managedAssociation?.description || 'Ajoutez une description pour mieux presenter la mission de votre structure.'}
@@ -173,7 +189,7 @@ export default function ProfilePage({ profile, onLoadProfile, onSaveProfile }) {
                   });
                 }}
               >
-                <div className="profile-grid">
+                <div className="profile-grid association-public-grid">
                   <div>
                     <span className="profile-label">Nom de l'association</span>
                     <input
@@ -211,7 +227,7 @@ export default function ProfilePage({ profile, onLoadProfile, onSaveProfile }) {
                       disabled={!isEditingAssociation}
                     />
                   </div>
-                  <div style={{ gridColumn: '1 / -1' }}>
+                  <div className="association-public-full">
                     <span className="profile-label">Description</span>
                     <textarea
                       value={associationForm.description}
@@ -221,7 +237,7 @@ export default function ProfilePage({ profile, onLoadProfile, onSaveProfile }) {
                       rows={4}
                     />
                   </div>
-                  <div style={{ gridColumn: '1 / -1' }}>
+                  <div className="association-public-full">
                     <span className="profile-label">Compte de connexion</span>
                     <p>{profile.email}</p>
                   </div>
@@ -233,27 +249,13 @@ export default function ProfilePage({ profile, onLoadProfile, onSaveProfile }) {
                   <button className="solid" type="submit" disabled={!isEditingAssociation}>
                     Enregistrer
                   </button>
+                  <button className="danger" type="button" onClick={handleDeleteAccount} disabled={isDeletingAccount}>
+                    {isDeletingAccount ? 'Suppression...' : 'Supprimer mon compte'}
+                  </button>
                 </div>
               </form>
             </article>
 
-            <article className="card association-panel">
-              <h3>Résumé</h3>
-              <div className="detail-stack">
-                <div className="mini-card">
-                  <h3>Missions publiees</h3>
-                  <p>{associationOffers.length} mission(s) en ligne</p>
-                </div>
-                <div className="mini-card">
-                  <h3>Demandes recues</h3>
-                  <p>{volunteerApplications.length} candidature(s) a traiter</p>
-                </div>
-                <div className="mini-card">
-                  <h3>Avis benevoles</h3>
-                  <p>{volunteerReviews.length} avis publie(s)</p>
-                </div>
-              </div>
-            </article>
           </div>
         )}
 
@@ -268,7 +270,7 @@ export default function ProfilePage({ profile, onLoadProfile, onSaveProfile }) {
                     <span className="badge">{offer.location}</span>
                   </div>
                   <p>{offer.description}</p>
-                  <small>Du {formatDate(offer.startDate)} au {formatDate(offer.endDate)}</small>
+                  <small>Date : {formatDate(offer.startDate)} - Duree : {offer.durationHours || '-'} h</small>
                 </div>
               )) : <p className="muted">Aucune mission publiee pour le moment.</p>}
             </div>
@@ -433,6 +435,9 @@ export default function ProfilePage({ profile, onLoadProfile, onSaveProfile }) {
             </button>
             <button className="solid" type="submit" disabled={!isEditing || !isDirty}>
               Enregistrer
+            </button>
+            <button className="danger" type="button" onClick={handleDeleteAccount} disabled={isDeletingAccount}>
+              {isDeletingAccount ? 'Suppression...' : 'Supprimer mon compte'}
             </button>
           </div>
         </form>

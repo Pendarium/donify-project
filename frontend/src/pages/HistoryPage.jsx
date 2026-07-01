@@ -137,7 +137,7 @@ export default function HistoryPage({ history, bookings = [], onLoadHistory, onL
       <div className="section-header-block">
         <p className="kicker">CALENDRIER</p>
         <h2>Planning benevole</h2>
-        <p>{history.length} mission(s) validee(s) et {bookings.length} booking(s) perso</p>
+        <p>{history.length} mission(s) validee(s) et {bookings.length} reservation(s) perso</p>
       </div>
 
       <div className="history-calendar-shell">
@@ -173,7 +173,7 @@ export default function HistoryPage({ history, bookings = [], onLoadHistory, onL
                   <strong>{day.date.getDate()}</strong>
                   <div className="history-calendar-day-meta">
                     {dayHistoryCount > 0 && <span className="badge">Validees: {dayHistoryCount}</span>}
-                    {dayBookingCount > 0 && <span className="badge">Bookings: {dayBookingCount}</span>}
+                    {dayBookingCount > 0 && <span className="badge">Reservations : {dayBookingCount}</span>}
                   </div>
                 </button>
               );
@@ -200,25 +200,25 @@ export default function HistoryPage({ history, bookings = [], onLoadHistory, onL
           </div>
 
           <div className="detail-stack">
-            <h4>Mes bookings</h4>
+            <h4>Mes reservations</h4>
             {selectedBookings.length ? selectedBookings.map((booking) => (
               <div className="application-card" key={booking.id}>
                 <div className="offer-head">
-                  <span className="badge">Booking perso</span>
+                  <span className="badge">Reservation perso</span>
                   <button className="danger" type="button" onClick={() => removeBooking(booking.id)}>Supprimer</button>
                 </div>
                 <p>{booking.title}</p>
                 {booking.note && <small>{booking.note}</small>}
               </div>
-            )) : <p className="muted">Aucun booking pour cette date.</p>}
+            )) : <p className="muted">Aucune reservation pour cette date.</p>}
           </div>
 
           <div className="detail-stack">
-            <h4>Booker ce jour</h4>
+            <h4>Ajouter une reservation ce jour</h4>
             <input
               value={titleDraft}
               onChange={(e) => setTitleDraft(e.target.value)}
-              placeholder="Titre du booking"
+              placeholder="Titre de la reservation"
             />
             <textarea
               value={noteDraft}

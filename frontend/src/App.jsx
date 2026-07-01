@@ -8,8 +8,11 @@ import AuthPage from './pages/AuthPage';
 import FavoritesPage from './pages/FavoritesPage';
 import HistoryPage from './pages/HistoryPage';
 import HomePage from './pages/HomePage';
+import MyMissionsPage from './pages/MyMissionsPage';
+import MyVolunteersPage from './pages/MyVolunteersPage';
 import OffersPage from './pages/OffersPage';
 import ProfilePage from './pages/ProfilePage';
+import VolunteerProfilePage from './pages/VolunteerProfilePage';
 
 export default function App() {
   const navigate = useNavigate();
@@ -50,8 +53,23 @@ export default function App() {
         method: 'POST',
         body: JSON.stringify(payload),
       });
-      setToken(data.accessToken);
-      setTokenState(data.accessToken);
+
+      let accessToken = data?.accessToken || '';
+      if (!accessToken) {
+        // Fallback: some backend variants return user info without token on register.
+        const loginData = await api('/auth/login', {
+          method: 'POST',
+          body: JSON.stringify({ identifier: payload.email, password: payload.password }),
+        });
+        accessToken = loginData?.accessToken || '';
+      }
+
+      if (!accessToken) {
+        throw new Error('Aucun token recu apres inscription');
+      }
+
+      setToken(accessToken);
+      setTokenState(accessToken);
       if (payload.role === 'association') {
         await loadProfile();
         setOk('Association creee avec les infos RNA chargees');
@@ -88,15 +106,36 @@ export default function App() {
     setHistory([]);
     setBookings([]);
     setApplications([]);
-    setOk('Logout effectue');
+    setOk('Deconnexion effectuee');
     navigate('/');
+  };
+
+  const handleDeleteAccount = async () => {
+    try {
+      await api('/users/profile', {
+        method: 'DELETE',
+      });
+
+      clearToken();
+      setTokenState('');
+      setProfile(null);
+      setFavorites([]);
+      setHistory([]);
+      setBookings([]);
+      setApplications([]);
+      setOffers([]);
+      setOk('Compte supprime avec succes');
+      navigate('/');
+    } catch (error) {
+      setErr(`Suppression compte KO: ${error.message}`);
+      throw error;
+    }
   };
 
   const loadProfile = async () => {
     try {
       const data = await api('/users/profile');
       setProfile(data || null);
-      setOk(`Profil charge: ${data ? data.email : 'non trouve'}`);
     } catch (error) {
       setErr(`Profil KO: ${error.message}`);
     }
@@ -132,7 +171,6 @@ export default function App() {
       const data = await api('/associations');
       const items = Array.isArray(data) ? data : data.data || [];
       setAssociations(items);
-      setOk(`Associations chargees: ${items.length}`);
     } catch (error) {
       setErr(`Associations KO: ${error.message}`);
     }
@@ -151,7 +189,6 @@ export default function App() {
           : associationOffers;
 
         setOffers(items);
-        setOk(`Vos offres chargees: ${items.length}`);
         return;
       }
 
@@ -159,7 +196,6 @@ export default function App() {
       const data = await api(`/volunteer-offers${query}`);
       const items = Array.isArray(data) ? data : data.data || [];
       setOffers(items);
-      setOk(`Offres chargees: ${items.length}`);
     } catch (error) {
       setErr(`Offres KO: ${error.message}`);
     }
@@ -170,7 +206,6 @@ export default function App() {
       const data = await api('/users/favorites');
       const items = Array.isArray(data) ? data : data.data || [];
       setFavorites(items);
-      setOk(`Favoris charges: ${items.length}`);
     } catch (error) {
       setErr(`Favoris KO: ${error.message}`);
     }
@@ -195,7 +230,6 @@ export default function App() {
       const data = await api('/users/history');
       const items = Array.isArray(data) ? data : data.data || [];
       setHistory(items);
-      setOk(`Calendrier charge: ${items.length} mission(s) validee(s)`);
     } catch (error) {
       setErr(`Calendrier KO: ${error.message}`);
     }
@@ -218,9 +252,9 @@ export default function App() {
         body: JSON.stringify(payload),
       });
       setBookings((prev) => [created, ...prev]);
-      setOk('Booking ajoute au calendrier');
+      setOk('Reservation ajoutee au calendrier');
     } catch (error) {
-      setErr(`Ajout booking KO: ${error.message}`);
+      setErr(`Ajout reservation KO : ${error.message}`);
     }
   };
 
@@ -230,9 +264,9 @@ export default function App() {
         method: 'DELETE',
       });
       setBookings((prev) => prev.filter((item) => item.id !== bookingId));
-      setOk('Booking supprime');
+      setOk('Reservation supprimee');
     } catch (error) {
-      setErr(`Suppression booking KO: ${error.message}`);
+      setErr(`Suppression reservation KO : ${error.message}`);
     }
   };
 
@@ -241,7 +275,6 @@ export default function App() {
       const data = await api('/users/applications');
       const items = Array.isArray(data) ? data : data.data || [];
       setApplications(items);
-      setOk(`Candidatures chargees: ${items.length}`);
     } catch (error) {
       setErr(`Candidatures KO: ${error.message}`);
     }
@@ -343,7 +376,6 @@ export default function App() {
                 applicationIds={applications.map((application) => application.offerId)}
                 onSubmitApplication={submitApplication}
                 onCreateOffer={createOffer}
-                onValidateApplication={validateApplicationParticipation}
                 onDeleteOffer={deleteOffer}
               />
             )
@@ -366,6 +398,30 @@ export default function App() {
               onCreateBooking={createBooking}
               onDeleteBooking={deleteBooking}
             />
+            : <Navigate to="/" replace />}
+        />
+        <Route
+          path="/mes-missions"
+          element={isAuthenticated && role === 'user'
+            ? <MyMissionsPage
+              history={history}
+              favorites={favorites}
+              onLoadHistory={loadHistory}
+              onLoadFavorites={loadFavorites}
+              onRemoveFavorite={(offerId) => toggleFavorite(offerId, true)}
+            />
+            : <Navigate to="/" replace />}
+        />
+        <Route
+          path="/mes-benevoles"
+          element={isAuthenticated && role === 'association'
+            ? <MyVolunteersPage profile={profile} onLoadProfile={loadProfile} onValidateApplication={validateApplicationParticipation} />
+            : <Navigate to="/" replace />}
+        />
+        <Route
+          path="/benevoles/:volunteerId"
+          element={isAuthenticated && role === 'association'
+            ? <VolunteerProfilePage />
             : <Navigate to="/" replace />}
         />
         <Route path="/historique" element={<Navigate to="/calendrier" replace />} />
@@ -399,15 +455,13 @@ export default function App() {
         />
         <Route
           path="/profile"
-          element={isAuthenticated ? <ProfilePage profile={profile} onLoadProfile={loadProfile} onSaveProfile={saveProfile} /> : <Navigate to="/" replace />}
+          element={isAuthenticated
+            ? <ProfilePage profile={profile} onLoadProfile={loadProfile} onSaveProfile={saveProfile} onDeleteAccount={handleDeleteAccount} />
+            : <Navigate to="/" replace />}
         />
         <Route path="/auth" element={<Navigate to={isAuthenticated ? "/profile" : "/"} replace />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-
-      <p className="footnote">
-        Docs API: <a href="http://localhost:3000/api/docs">http://localhost:3000/api/docs</a>
-      </p>
     </AppLayout>
   );
 }

@@ -67,7 +67,7 @@ export async function api(path, options = {}) {
   const body = await res.json().catch(() => ({}));
 
   if (!res.ok) {
-    const msg = body.message || body.error || `HTTP ${res.status}`;
+    const msg = body.message || body.error || `Erreur HTTP ${res.status}`;
     throw new Error(Array.isArray(msg) ? msg.join(', ') : msg);
   }
 

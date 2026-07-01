@@ -27,10 +27,10 @@ export default function FavoritesPage({ favorites, onLoadFavorites, onRemoveFavo
               <h3>{offer.title}</h3>
               <p>{offer.description}</p>
               <small>
-                {new Date(offer.startDate).toLocaleDateString('fr-FR')} - {new Date(offer.endDate).toLocaleDateString('fr-FR')}
+                Date : {new Date(offer.startDate).toLocaleDateString('fr-FR')} - Duree : {offer.durationHours || '-'} h
               </small>
               <p className="offer-meta-line">
-                Association: <Link className="inline-link" to={`/associations/${offer.associationId}`}>{offer.association?.name || 'Voir la fiche'}</Link>
+                Association : <Link className="inline-link" to={`/associations/${offer.associationId}`}>{offer.association?.name || 'Voir la fiche'}</Link>
               </p>
               <div className="actions-row">
                 <Link className="solid action-link" to={`/associations/${offer.associationId}`}>Voir l'association</Link>

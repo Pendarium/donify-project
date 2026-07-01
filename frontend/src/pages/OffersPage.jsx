@@ -13,18 +13,17 @@ export default function OffersPage({
   applicationIds = [],
   onSubmitApplication,
   onCreateOffer,
-  onValidateApplication,
   onDeleteOffer,
 }) {
+  const todayIso = new Date().toISOString().split('T')[0];
   const [searchParams] = useSearchParams();
   const [city, setCity] = useState(searchParams.get('city') || '');
+  const selectedOfferId = searchParams.get('offerId') || '';
   const [activeChip, setActiveChip] = useState('Toutes');
   const [urgentOnly, setUrgentOnly] = useState(false);
   const [applicationDrafts, setApplicationDrafts] = useState({});
   const [activeApplicationOfferId, setActiveApplicationOfferId] = useState(null);
-  const [activeCandidatesOfferId, setActiveCandidatesOfferId] = useState(null);
   const [activeAcceptedOfferId, setActiveAcceptedOfferId] = useState(null);
-  const [validatingApplicationId, setValidatingApplicationId] = useState(null);
   const [deletingOfferId, setDeletingOfferId] = useState(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const emptyForm = {
@@ -43,7 +42,7 @@ export default function OffersPage({
   }, [city]);
 
   const filtered = useMemo(() => {
-    return offers.filter((offer) => {
+    const filteredOffers = offers.filter((offer) => {
       const text = `${offer.title} ${offer.description} ${offer.location}`.toLowerCase();
       const matchesChip =
         activeChip === 'Toutes' ? true : text.includes(activeChip.toLowerCase().replace('aide ', ''));
@@ -51,7 +50,17 @@ export default function OffersPage({
       const matchesUrgent = urgentOnly ? isUrgent : true;
       return matchesChip && matchesUrgent;
     });
-  }, [offers, activeChip, urgentOnly]);
+
+    if (!selectedOfferId) {
+      return filteredOffers;
+    }
+
+    return [...filteredOffers].sort((left, right) => {
+      if (left.id === selectedOfferId) return -1;
+      if (right.id === selectedOfferId) return 1;
+      return 0;
+    });
+  }, [offers, activeChip, urgentOnly, selectedOfferId]);
 
   const activeApplicationOffer = filtered.find((offer) => offer.id === activeApplicationOfferId) || null;
 
@@ -107,6 +116,10 @@ export default function OffersPage({
     const startDate = new Date(createDraft.missionDate);
     const durationHours = Number(createDraft.durationHours);
     const volunteersNeeded = Number(createDraft.volunteersNeeded);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const startDay = new Date(startDate);
+    startDay.setHours(0, 0, 0, 0);
 
     if (
       Number.isNaN(startDate.getTime())
@@ -114,6 +127,7 @@ export default function OffersPage({
       || durationHours < 1
       || !Number.isInteger(volunteersNeeded)
       || volunteersNeeded < 1
+      || startDay < today
     ) {
       return;
     }
@@ -131,16 +145,6 @@ export default function OffersPage({
       isUrgent: Boolean(createDraft.isUrgent),
     });
     closeCreateModal();
-  };
-
-  const handleValidateApplication = async (applicationId) => {
-    if (!applicationId || validatingApplicationId) {
-      return;
-    }
-
-    setValidatingApplicationId(applicationId);
-    await onValidateApplication?.(applicationId);
-    setValidatingApplicationId(null);
   };
 
   const handleDeleteOffer = async (offerId) => {
@@ -203,7 +207,7 @@ export default function OffersPage({
 
       <div className="cards-grid wide">
         {filtered.map((offer) => (
-          <article className="offer-card" key={offer.id}>
+          <article className={offer.id === selectedOfferId ? 'offer-card active-outline' : 'offer-card'} key={offer.id}>
             <div className="offer-head">
               <div className="offer-head-meta">
                 <span className="badge">{offer.location}</span>
@@ -224,12 +228,12 @@ export default function OffersPage({
             <h3>{offer.title}</h3>
             <p>{offer.description}</p>
             <small>
-              {new Date(offer.startDate).toLocaleDateString()} - {new Date(offer.endDate).toLocaleDateString()}
+              Date : {new Date(offer.startDate).toLocaleDateString('fr-FR')}
             </small>
-            <p className="offer-meta-line">Duree: {offer.durationHours || '-'} h</p>
-            <p className="offer-meta-line">Benevoles necessaires: {offer.volunteersNeeded || '-'}</p>
+            <p className="offer-meta-line">Duree : {offer.durationHours || '-'} h</p>
+            <p className="offer-meta-line">Benevoles necessaires : {offer.volunteersNeeded || '-'}</p>
             <p className="offer-meta-line">
-              Association: {role === 'association'
+              Association : {role === 'association'
                 ? 'Votre association'
                 : <Link className="inline-link" to={`/associations/${offer.associationId}`}>{offer.association?.name || 'Association'}</Link>}
             </p>
@@ -257,18 +261,11 @@ export default function OffersPage({
               <>
                 <div className="actions-row">
                   <button
-                    className={activeCandidatesOfferId === offer.id ? 'solid action-link active-outline' : 'solid action-link'}
-                    type="button"
-                    onClick={() => setActiveCandidatesOfferId((prev) => (prev === offer.id ? null : offer.id))}
-                  >
-                    Candidatures ({(offer.applications || []).length})
-                  </button>
-                  <button
                     className={activeAcceptedOfferId === offer.id ? 'solid action-link active-outline' : 'solid action-link'}
                     type="button"
                     onClick={() => setActiveAcceptedOfferId((prev) => (prev === offer.id ? null : offer.id))}
                   >
-                    Acceptes ({(offer.historyUsers || []).length})
+                    Acceptees ({(offer.historyUsers || []).length})
                   </button>
                   <button
                     className="danger action-link"
@@ -280,30 +277,6 @@ export default function OffersPage({
                   </button>
                 </div>
 
-                {activeCandidatesOfferId === offer.id && (
-                  <div className="detail-stack">
-                    {(offer.applications || []).length ? (offer.applications || []).map((application) => (
-                      <div className="application-card" key={application.id}>
-                        <div className="offer-head">
-                          <span className="badge">{application.user?.username || 'Benevole'}</span>
-                          <span className="badge">{new Date(application.createdAt).toLocaleDateString()}</span>
-                        </div>
-                        <p>{application.message || 'Aucun message joint a cette candidature.'}</p>
-                        <div className="actions-row">
-                          <button
-                            className="solid action-link"
-                            type="button"
-                            disabled={validatingApplicationId === application.id}
-                            onClick={() => handleValidateApplication(application.id)}
-                          >
-                            {validatingApplicationId === application.id ? 'Validation...' : 'Valider participation'}
-                          </button>
-                        </div>
-                      </div>
-                    )) : <p className="muted">Aucune candidature pour cette offre pour le moment.</p>}
-                  </div>
-                )}
-
                 {activeAcceptedOfferId === offer.id && (
                   <div className="detail-stack">
                     {(offer.historyUsers || []).length ? (offer.historyUsers || []).map((entry) => (
@@ -312,7 +285,7 @@ export default function OffersPage({
                           <span className="badge">{entry.user?.username || 'Benevole'}</span>
                           <span className="badge">Valide le {new Date(entry.completedAt).toLocaleDateString()}</span>
                         </div>
-                        <p>{entry.note || 'Participation validee sans note.'}</p>
+                        <p>{entry.note || 'Participation validee sans commentaire.'}</p>
                       </div>
                     )) : <p className="muted">Aucun benevole valide pour cette offre pour le moment.</p>}
                   </div>
@@ -343,7 +316,7 @@ export default function OffersPage({
             </div>
 
             <p className="modal-copy">
-              Ajoute un petit message pour expliquer ta motivation avant d'envoyer ta candidature.
+              Ajoutez un petit message pour expliquer votre motivation avant d'envoyer votre candidature.
             </p>
 
             <textarea
@@ -428,6 +401,7 @@ export default function OffersPage({
                 <input
                   name="missionDate"
                   type="date"
+                  min={todayIso}
                   value={createDraft.missionDate}
                   onChange={handleCreateFieldChange}
                 />
@@ -476,6 +450,7 @@ export default function OffersPage({
                     || !createDraft.description
                     || !createDraft.location
                     || !createDraft.missionDate
+                    || createDraft.missionDate < todayIso
                     || !Number.isInteger(Number(createDraft.durationHours))
                     || Number(createDraft.durationHours) < 1
                     || !Number.isInteger(Number(createDraft.volunteersNeeded))

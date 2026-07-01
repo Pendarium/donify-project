@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 
@@ -27,11 +27,6 @@ export default function AuthPage({ token, role, onRegister, onLogin, onLogout, o
     setLoginIdentifier('');
     setLoginPassword('');
   }, [location.key, mode]);
-
-  const tokenPreview = useMemo(() => {
-    if (!token) return 'Aucun token';
-    return `Token present (${token.slice(0, 24)}...)`;
-  }, [token]);
 
   return (
     <section className="auth-wrap">
@@ -82,11 +77,11 @@ export default function AuthPage({ token, role, onRegister, onLogin, onLogout, o
               <input
                 value={regUsername}
                 onChange={(e) => setRegUsername(e.target.value)}
-                placeholder="Username"
+                placeholder="Nom d'utilisateur"
                 required
               />
             )}
-            <input value={regEmail} onChange={(e) => setRegEmail(e.target.value)} type="email" placeholder="Email" required />
+            <input value={regEmail} onChange={(e) => setRegEmail(e.target.value)} type="email" placeholder="Adresse e-mail" required />
             {signupType === 'association' && (
               <div className="auth-field-group">
                 <input
@@ -110,20 +105,18 @@ export default function AuthPage({ token, role, onRegister, onLogin, onLogout, o
               onLogin({ identifier: loginIdentifier, password: loginPassword });
             }}
           >
-            <input value={loginIdentifier} onChange={(e) => setLoginIdentifier(e.target.value)} placeholder="Username ou email" required />
-            <input value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} type="password" placeholder="Password" required />
+            <input value={loginIdentifier} onChange={(e) => setLoginIdentifier(e.target.value)} placeholder="Nom d'utilisateur ou e-mail" required />
+            <input value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} type="password" placeholder="Mot de passe" required />
             <button className="solid" type="submit">Se connecter</button>
           </form>
         )}
 
         {token && (
           <div className="auth-tools">
-            <button className="ghost" type="button" onClick={onProfile}>Voir profil</button>
-            <button className="danger" type="button" onClick={onLogout}>Logout</button>
+            <button className="ghost" type="button" onClick={onProfile}>Voir le profil</button>
+            <button className="danger" type="button" onClick={onLogout}>Deconnexion</button>
           </div>
         )}
-
-        <p className="muted">{tokenPreview}{role ? ` - role: ${role}` : ''}</p>
       </article>
     </section>
   );

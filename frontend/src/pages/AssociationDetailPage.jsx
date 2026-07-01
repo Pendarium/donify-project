@@ -73,9 +73,6 @@ export default function AssociationDetailPage() {
           </p>
           <div className="chips-inline">
             <span className="badge">RNA {association.rnaNumber}</span>
-            <span className={association.isCertified ? 'badge success' : 'badge warning'}>
-              {association.isCertified ? 'Association verifiee' : 'Verification en attente'}
-            </span>
             <span className="badge">{association.offers?.length || 0} mission(s)</span>
           </div>
         </div>
@@ -110,8 +107,13 @@ export default function AssociationDetailPage() {
                 </div>
                 <p>{offer.description}</p>
                 <small>
-                  Du {new Date(offer.startDate).toLocaleDateString('fr-FR')} au {new Date(offer.endDate).toLocaleDateString('fr-FR')}
+                  Date : {new Date(offer.startDate).toLocaleDateString('fr-FR')} - Duree : {offer.durationHours || '-'} h
                 </small>
+                <div className="actions-row">
+                  <Link className="solid action-link" to={`/benevolat?offerId=${offer.id}`}>
+                    Voir cette offre
+                  </Link>
+                </div>
               </div>
             )) : <p className="muted">Aucune mission publiee pour le moment.</p>}
           </div>
