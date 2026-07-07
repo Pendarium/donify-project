@@ -1,0 +1,135 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id                         String                  @id @default(uuid())
+  username                   String
+  firstName                  String?
+  lastName                   String?
+  age                        Int?
+  address                    String?
+  city                       String?
+  postalCode                 String?
+  phone                      String?
+  email                      String                  @unique
+  password                   String
+  role                       String                  @default("user")
+  associationId              String?                @unique
+  association                Association?           @relation(fields: [associationId], references: [id])
+  createdAt                  DateTime                @default(now())
+  reviews                    Review[]
+  associationReviewsReceived AssociationUserReview[]
+  favoriteOffers             FavoriteOffer[]
+  volunteerHistory           VolunteerHistoryEntry[]
+  offerApplications          VolunteerApplication[]
+  bookings                   VolunteerBooking[]
+}
+
+model Association {
+  id                     String                  @id @default(uuid())
+  name                   String
+  description            String?
+  address                String
+  email                  String?
+  phone                  String?
+  rnaNumber              String                  @unique
+  isCertified            Boolean                 @default(false)
+  manager                User?
+  createdAt              DateTime                @default(now())
+  reviews                Review[]
+  offers                 VolunteerOffer[]
+  userReviewsAuthored    AssociationUserReview[]
+}
+
+model VolunteerOffer {
+  id            String      @id @default(uuid())
+  title         String
+  description   String
+  location      String
+  durationHours Int         @default(2)
+  volunteersNeeded Int      @default(1)
+  isUrgent      Boolean     @default(false)
+  startDate     DateTime
+  endDate       DateTime
+  createdAt     DateTime    @default(now())
+  associationId String
+  association   Association @relation(fields: [associationId], references: [id])
+  favoritedBy   FavoriteOffer[]
+  historyUsers  VolunteerHistoryEntry[]
+  applications  VolunteerApplication[]
+}
+
+model Review {
+  id            String      @id @default(uuid())
+  rating        Int
+  comment       String?
+  createdAt     DateTime    @default(now())
+  userId        String
+  associationId String
+  association   Association @relation(fields: [associationId], references: [id])
+  user          User        @relation(fields: [userId], references: [id])
+}
+
+model AssociationUserReview {
+  id            String      @id @default(uuid())
+  rating        Int
+  comment       String?
+  createdAt     DateTime    @default(now())
+  userId        String
+  associationId String
+  association   Association @relation(fields: [associationId], references: [id])
+  user          User        @relation(fields: [userId], references: [id])
+
+  @@unique([userId, associationId])
+}
+
+model FavoriteOffer {
+  id        String         @id @default(uuid())
+  createdAt DateTime       @default(now())
+  userId    String
+  offerId   String
+  user      User           @relation(fields: [userId], references: [id])
+  offer     VolunteerOffer @relation(fields: [offerId], references: [id])
+
+  @@unique([userId, offerId])
+}
+
+model VolunteerHistoryEntry {
+  id          String         @id @default(uuid())
+  createdAt   DateTime       @default(now())
+  completedAt DateTime       @default(now())
+  note        String?
+  userId      String
+  offerId     String
+  user        User           @relation(fields: [userId], references: [id])
+  offer       VolunteerOffer @relation(fields: [offerId], references: [id])
+
+  @@unique([userId, offerId])
+}
+
+model VolunteerApplication {
+  id        String         @id @default(uuid())
+  createdAt DateTime       @default(now())
+  message   String?
+  userId    String
+  offerId   String
+  user      User           @relation(fields: [userId], references: [id])
+  offer     VolunteerOffer @relation(fields: [offerId], references: [id])
+
+  @@unique([userId, offerId])
+}
+
+model VolunteerBooking {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  date      DateTime
+  title     String
+  note      String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+}
