@@ -20,7 +20,7 @@ export default function AppLayout({ children, isAuthenticated, role, onGoLogin, 
         <nav className="menu">
           {isAuthenticated && (
             <>
-              <NavLink to="/associations" className={({ isActive }) => (isActive ? 'menu-item active' : 'menu-item')}>
+              <NavLink to="/associations" className={({ isActive }) => (isActive ? 'menu-item association-nav-link active' : 'menu-item association-nav-link')}>
                 Associations
               </NavLink>
               <NavLink to="/benevolat" className={({ isActive }) => (isActive ? 'menu-item active' : 'menu-item')}>

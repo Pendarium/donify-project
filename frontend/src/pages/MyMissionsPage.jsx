@@ -136,7 +136,7 @@ export default function MyMissionsPage({ history = [], favorites = [], onLoadHis
                   <td>{row.location}</td>
                   <td>
                     {row.associationId
-                      ? <Link className="inline-link" to={`/associations/${row.associationId}`}>{row.associationName}</Link>
+                        ? <Link className="inline-link association-link" to={`/associations/${row.associationId}`}>{row.associationName}</Link>
                       : row.associationName}
                   </td>
                   <td>

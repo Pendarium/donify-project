@@ -42,6 +42,20 @@ export default function OffersPage({
   }, [city]);
 
   const filtered = useMemo(() => {
+    if (role === 'association') {
+      const associationOffers = [...offers];
+
+      if (!selectedOfferId) {
+        return associationOffers;
+      }
+
+      return associationOffers.sort((left, right) => {
+        if (left.id === selectedOfferId) return -1;
+        if (right.id === selectedOfferId) return 1;
+        return 0;
+      });
+    }
+
     const filteredOffers = offers.filter((offer) => {
       const text = `${offer.title} ${offer.description} ${offer.location}`.toLowerCase();
       const matchesChip =
@@ -164,46 +178,52 @@ export default function OffersPage({
 
   return (
     <section className="page-block">
-      <div className="section-header-block">
+      <div className={role === 'association' ? 'section-header-block offers-header association-offers-header' : 'section-header-block offers-header'}>
         <p className="kicker">BENEVOLAT</p>
-        <h2>Offres de benevolat</h2>
-        <p>{filtered.length} missions disponibles</p>
         {isAuthenticated && role === 'association' && (
-          <button className="solid" type="button" onClick={() => setShowCreateModal(true)}>
-            + Creer une offre
-          </button>
-        )}
-      </div>
-
-      <div className="search card">
-        <form
-          className="search-form"
-          onSubmit={(e) => {
-            e.preventDefault();
-            onLoadOffers(city);
-          }}
-        >
-          <input value={city} onChange={(e) => setCity(e.target.value)} placeholder="Ville ou code postal" />
-          <button type="submit">Rechercher</button>
-        </form>
-      </div>
-
-      <div className="chips-row split">
-        <div className="chips-inline">
-          {chips.map((chip) => (
-            <button
-              key={chip}
-              className={chip === activeChip ? 'chip active' : 'chip'}
-              onClick={() => setActiveChip(chip)}
-            >
-              {chip}
+          <div className="offers-header-actions">
+            <button className="solid" type="button" onClick={() => setShowCreateModal(true)}>
+              + Creer une offre
             </button>
-          ))}
-        </div>
-        <button className={urgentOnly ? 'chip active' : 'chip'} onClick={() => setUrgentOnly((v) => !v)}>
-          Urgents uniquement
-        </button>
+          </div>
+        )}
+        <h2>{role === 'association' ? 'Mes offres' : 'Offres de benevolat'}</h2>
+        <p>{filtered.length} {role === 'association' ? 'offre(s) publiee(s)' : 'missions disponibles'}</p>
       </div>
+
+      {role !== 'association' && (
+        <>
+          <div className="search card">
+            <form
+              className="search-form"
+              onSubmit={(e) => {
+                e.preventDefault();
+                onLoadOffers(city);
+              }}
+            >
+              <input value={city} onChange={(e) => setCity(e.target.value)} placeholder="Ville ou code postal" />
+              <button type="submit">Rechercher</button>
+            </form>
+          </div>
+
+          <div className="chips-row split">
+            <div className="chips-inline">
+              {chips.map((chip) => (
+                <button
+                  key={chip}
+                  className={chip === activeChip ? 'chip active' : 'chip'}
+                  onClick={() => setActiveChip(chip)}
+                >
+                  {chip}
+                </button>
+              ))}
+            </div>
+            <button className={urgentOnly ? 'chip active' : 'chip'} onClick={() => setUrgentOnly((v) => !v)}>
+              Urgents uniquement
+            </button>
+          </div>
+        </>
+      )}
 
       <div className="cards-grid wide">
         {filtered.map((offer) => (
@@ -235,7 +255,7 @@ export default function OffersPage({
             <p className="offer-meta-line">
               Association : {role === 'association'
                 ? 'Votre association'
-                : <Link className="inline-link" to={`/associations/${offer.associationId}`}>{offer.association?.name || 'Association'}</Link>}
+                : <Link className="inline-link association-link" to={`/associations/${offer.associationId}`}>{offer.association?.name || 'Association'}</Link>}
             </p>
             {role === 'user' && (
               <div className="actions-row">

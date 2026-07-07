@@ -30,6 +30,15 @@ export default function App() {
   const isAuthenticated = Boolean(token);
 
   useEffect(() => {
+    const isAssociation = isAuthenticated && role === 'association';
+    document.body.classList.toggle('role-association', isAssociation);
+
+    return () => {
+      document.body.classList.remove('role-association');
+    };
+  }, [isAuthenticated, role]);
+
+  useEffect(() => {
     if (!token || role !== 'user') {
       setFavorites([]);
       setHistory([]);

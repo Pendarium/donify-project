@@ -75,7 +75,7 @@ export default function MyVolunteersPage({ profile, onLoadProfile, onValidateApp
   };
 
   return (
-    <section className="page-block">
+    <section className="page-block association-theme">
       <div className="section-header-block">
         <p className="kicker">MES BENEVOLES</p>
         <h2>Suivi des benevoles</h2>

@@ -100,6 +100,18 @@ button {
   font-family: inherit;
 }
 
+button,
+.menu-item,
+.chip,
+.action-link,
+.inline-link,
+.inline-badge-link,
+.association-title-link,
+.brand-link,
+.heart-favorite {
+  transition: transform 0.16s ease, box-shadow 0.16s ease;
+}
+
 button.solid {
   background: linear-gradient(120deg, #30bbb2, #1da06f);
   color: white;
@@ -408,6 +420,36 @@ form button {
 .section-header-block p {
   margin: 6px 0 0;
   color: #4f6f76;
+}
+
+.offers-header {
+  display: grid;
+  gap: 8px;
+}
+
+.offers-header-actions {
+  display: flex;
+  align-items: center;
+}
+
+.association-offers-header {
+  border: 1px solid #f4ccd7;
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(255, 196, 214, 0.32), rgba(255, 238, 230, 0.88));
+  padding: 16px 18px;
+  margin-bottom: 18px;
+}
+
+.association-offers-header .kicker {
+  margin-bottom: 0;
+}
+
+.association-offers-header h2 {
+  margin-top: 2px;
+}
+
+.association-offers-header p {
+  margin-top: 0;
 }
 
 .kicker {
@@ -719,12 +761,12 @@ form button {
   grid-template-columns: minmax(0, 1.4fr) minmax(280px, 0.8fr);
   gap: 20px;
   padding: 24px;
-  background: linear-gradient(135deg, rgba(36, 180, 171, 0.16), rgba(255, 255, 255, 0.96));
+  background: linear-gradient(135deg, rgba(255, 196, 214, 0.42), rgba(255, 238, 230, 0.92));
 }
 
 .association-profile-copy {
   margin-top: 14px;
-  color: #41656d;
+  color: #7a4f5b;
   max-width: 60ch;
   font-size: 1.02rem;
 }
@@ -736,20 +778,20 @@ form button {
 }
 
 .association-kpi {
-  border: 1px solid #c8e7ea;
+  border: 1px solid #f5c5d2;
   border-radius: 18px;
-  background: rgba(255, 255, 255, 0.82);
+  background: rgba(255, 245, 248, 0.9);
   padding: 14px;
 }
 
 .association-kpi strong {
   display: block;
   font-size: 1.8rem;
-  color: #16958f;
+  color: #de6d86;
 }
 
 .association-kpi span {
-  color: #4b6e76;
+  color: #8a6270;
   font-weight: 700;
 }
 
@@ -788,7 +830,133 @@ form button {
 }
 
 .association-tabs .chip {
-  border: 1px solid #b9dde1;
+  border: 1px solid #f4c7d3;
+  background: #fff4f7;
+  color: #8a6270;
+}
+
+.association-tabs .chip.active {
+  background: linear-gradient(120deg, #f3a0b4, #eb8f79);
+  color: #fff;
+  border-color: transparent;
+}
+
+.association-profile-shell .kicker {
+  color: #dc7d95;
+}
+
+.association-profile-shell .badge {
+  background: #ffdfe8;
+  color: #a4576b;
+}
+
+body.role-association .association-theme .kicker {
+  color: #dc7d95;
+}
+
+body.role-association .association-theme .chip {
+  border-color: #f4c7d3;
+  background: #fff4f7;
+  color: #8a6270;
+}
+
+body.role-association .association-theme .chip.active {
+  background: linear-gradient(120deg, #f3a0b4, #eb8f79);
+  color: #fff;
+  border-color: transparent;
+}
+
+body.role-association .association-theme .badge {
+  background: #ffdfe8;
+  color: #a4576b;
+}
+
+body.role-association .association-theme .association-card,
+body.role-association .association-theme .offer-card,
+body.role-association .association-theme .application-card {
+  border-color: #f4ccd7;
+  background: linear-gradient(180deg, #fff8fa 0%, #fff2ed 100%);
+}
+
+body.role-association .association-theme .search.card,
+body.role-association .association-theme .detail-hero {
+  border-color: #f4ccd7;
+  background: linear-gradient(135deg, rgba(255, 196, 214, 0.4), rgba(255, 238, 230, 0.9));
+}
+
+body.role-association .association-link {
+  color: #c6617a;
+  border-bottom-color: #c6617a;
+}
+
+body.role-association .association-link-button.solid {
+  background: linear-gradient(120deg, #f3a0b4, #eb8f79);
+}
+
+body.role-association .association-link-button.ghost {
+  border-color: #f3a6bb;
+  color: #bf5e77;
+  background: #fff4f7;
+}
+
+body.role-association .association-nav-link {
+  color: #9f5d73;
+}
+
+body.role-association .association-nav-link.active {
+  border-color: #f0b6c6;
+  background: #ffeef4;
+  color: #c6617a;
+}
+
+body.role-association {
+  background: linear-gradient(180deg, #fff6fa 0%, #ffecea 100%);
+}
+
+body.role-association .topbar {
+  background: #fff5f8;
+  border-bottom-color: #f2c2cf;
+}
+
+body.role-association .menu-item {
+  color: #9f5d73;
+}
+
+body.role-association .menu-item.active {
+  border-color: #f0b6c6;
+  background: #ffeef4;
+  color: #c6617a;
+}
+
+body.role-association button.solid,
+body.role-association .search-form button,
+body.role-association form button,
+body.role-association .association-link-button.solid {
+  background: linear-gradient(120deg, #f3a0b4, #eb8f79);
+  color: #fff;
+}
+
+body.role-association button.ghost,
+body.role-association .association-link-button.ghost {
+  border-color: #f2b6c6;
+  color: #bf5e77;
+  background: #fff4f7;
+}
+
+body.role-association button.danger {
+  background: #ffe8ee;
+  color: #d76582;
+  border-color: #f5c2cf;
+}
+
+body.role-association input,
+body.role-association textarea {
+  border-color: #f3c3d0;
+  background: #fff7fa;
+}
+
+body.role-association .card {
+  border-color: #f4ccd7;
 }
 
 .association-meta-list {
@@ -1237,6 +1405,78 @@ form button {
   background: #f7fcfc;
 }
 
+body.role-association .association-theme .missions-table-card {
+  border-color: #f4ccd7;
+  background: linear-gradient(180deg, #fff8fa 0%, #fff2ed 100%);
+}
+
+body.role-association .association-theme .missions-table th,
+body.role-association .association-theme .missions-table td {
+  border-bottom-color: #f2d0d8;
+  color: #7b4f5d;
+}
+
+body.role-association .association-theme .missions-table th {
+  color: #b55f76;
+  background: #ffeaf1;
+}
+
+body.role-association .association-theme .missions-table tbody tr:hover {
+  background: #fff3f7;
+}
+
+body.role-association .association-theme .badge.success {
+  background: #ffdfe8;
+  color: #a4576b;
+}
+
+body.role-association .association-theme .badge.warning {
+  background: #ffe7e1;
+  color: #bf6d60;
+}
+
+body.role-association .association-theme .ghost.action-link {
+  border: 1px solid #f2b6c6;
+  color: #bf5e77;
+  background: #fff4f7;
+}
+
+body.role-association .association-theme .profile-card {
+  border-color: #f4ccd7;
+  background: linear-gradient(180deg, #fff8fa 0%, #fff2ed 100%);
+}
+
+body.role-association .association-theme .profile-grid div {
+  border-color: #f2d0d8;
+  background: #fff4f7;
+}
+
+body.role-association .association-theme .profile-label {
+  color: #a05d72;
+}
+
+body.role-association .association-theme .profile-grid p {
+  color: #6f4754;
+}
+
+body.role-association .profile-card {
+  border-color: #f4ccd7;
+  background: linear-gradient(180deg, #fff8fa 0%, #fff2ed 100%);
+}
+
+body.role-association .profile-card .profile-grid div {
+  border-color: #f2d0d8;
+  background: #fff4f7;
+}
+
+body.role-association .profile-card .profile-label {
+  color: #a05d72;
+}
+
+body.role-association .profile-card .profile-grid p {
+  color: #6f4754;
+}
+
 .table-actions {
   display: flex;
   flex-wrap: wrap;
@@ -1266,6 +1506,24 @@ form button {
   margin: 0;
   color: #40656e;
   font-weight: 800;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  button:hover,
+  .menu-item:hover,
+  .chip:hover,
+  .action-link:hover,
+  .inline-link:hover,
+  .inline-badge-link:hover,
+  .association-title-link:hover,
+  .brand-link:hover,
+  .heart-favorite:hover {
+    transform: scale(1.03);
+  }
+
+  .heart-favorite:hover {
+    transform: translateY(-1px) scale(1.03);
+  }
 }
 
 @media (max-width: 1280px) {
