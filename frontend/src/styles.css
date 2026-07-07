@@ -38,9 +38,16 @@ body {
 .brand {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 0;
   font-size: 2rem;
   font-weight: 900;
+}
+
+.brand-logo {
+  width: 58px;
+  height: 58px;
+  object-fit: contain;
+  margin-right: -9px;
 }
 
 .brand-link {
