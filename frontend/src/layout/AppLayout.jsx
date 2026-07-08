@@ -6,24 +6,25 @@ export default function AppLayout({ children, isAuthenticated, role, onGoLogin, 
   return (
     <div className="page">
       <header className="topbar">
-        <Link to="/" className="brand-link">
+        <Link to={isAuthenticated ? '/associations' : '/'} className="brand-link">
           <div className="brand">
-            <div className="brand-dot" />
+            <img
+              className="brand-logo"
+              src="/logo_donnify.svg"
+              alt="Logo Donnify"
+            />
             <span>Donnify</span>
           </div>
         </Link>
 
         <nav className="menu">
-          <NavLink to="/" className={({ isActive }) => (isActive ? 'menu-item active' : 'menu-item')}>
-            Accueil
-          </NavLink>
           {isAuthenticated && (
             <>
-              <NavLink to="/associations" className={({ isActive }) => (isActive ? 'menu-item active' : 'menu-item')}>
+              <NavLink to="/associations" className={({ isActive }) => (isActive ? 'menu-item association-nav-link active' : 'menu-item association-nav-link')}>
                 Associations
               </NavLink>
               <NavLink to="/benevolat" className={({ isActive }) => (isActive ? 'menu-item active' : 'menu-item')}>
-                Benevolat
+                Missions
               </NavLink>
             </>
           )}

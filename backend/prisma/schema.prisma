@@ -57,6 +57,7 @@ model VolunteerOffer {
   startDate     DateTime
   endDate       DateTime
   createdAt     DateTime    @default(now())
+  deletedAt     DateTime?
   associationId String
   association   Association @relation(fields: [associationId], references: [id])
   favoritedBy   FavoriteOffer[]
@@ -109,7 +110,7 @@ model VolunteerHistoryEntry {
   user        User           @relation(fields: [userId], references: [id])
   offer       VolunteerOffer @relation(fields: [offerId], references: [id])
 
-  @@unique([userId, offerId])
+  @@index([userId, offerId])
 }
 
 model VolunteerApplication {

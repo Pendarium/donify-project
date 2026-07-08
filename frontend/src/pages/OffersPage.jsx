@@ -3,6 +3,33 @@ import { Link, useSearchParams } from 'react-router-dom';
 
 const chips = ['Toutes', 'Aide alimentaire', 'Aide sociale', 'Education', 'Environnement', 'Seniors'];
 
+function getLocalDateInputValue(date = new Date()) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function parseLocalMissionDate(value) {
+  const [year, month, day] = value.split('-').map(Number);
+  if (!year || !month || !day) {
+    return new Date('invalid');
+  }
+
+  // Use local midday to avoid UTC date shifts around midnight/timezones.
+  return new Date(year, month - 1, day, 12, 0, 0, 0);
+}
+
+const REJECTED_HISTORY_PREFIX = '__REJECTED_HISTORY__:';
+const CANCELLED_HISTORY_PREFIX = '__CANCELLED_BY_VOLUNTEER__:';
+
+function getAcceptedHistoryEntries(historyUsers = []) {
+  return historyUsers.filter((entry) => {
+    const note = entry?.note || '';
+    return !note.startsWith(REJECTED_HISTORY_PREFIX) && !note.startsWith(CANCELLED_HISTORY_PREFIX);
+  });
+}
+
 export default function OffersPage({
   offers,
   onLoadOffers,
@@ -15,7 +42,7 @@ export default function OffersPage({
   onCreateOffer,
   onDeleteOffer,
 }) {
-  const todayIso = new Date().toISOString().split('T')[0];
+  const todayIso = getLocalDateInputValue();
   const [searchParams] = useSearchParams();
   const [city, setCity] = useState(searchParams.get('city') || '');
   const selectedOfferId = searchParams.get('offerId') || '';
@@ -42,6 +69,20 @@ export default function OffersPage({
   }, [city]);
 
   const filtered = useMemo(() => {
+    if (role === 'association') {
+      const associationOffers = [...offers];
+
+      if (!selectedOfferId) {
+        return associationOffers;
+      }
+
+      return associationOffers.sort((left, right) => {
+        if (left.id === selectedOfferId) return -1;
+        if (right.id === selectedOfferId) return 1;
+        return 0;
+      });
+    }
+
     const filteredOffers = offers.filter((offer) => {
       const text = `${offer.title} ${offer.description} ${offer.location}`.toLowerCase();
       const matchesChip =
@@ -113,7 +154,7 @@ export default function OffersPage({
   };
 
   const handleSubmitCreate = async () => {
-    const startDate = new Date(createDraft.missionDate);
+    const startDate = parseLocalMissionDate(createDraft.missionDate);
     const durationHours = Number(createDraft.durationHours);
     const volunteersNeeded = Number(createDraft.volunteersNeeded);
     const today = new Date();
@@ -158,52 +199,61 @@ export default function OffersPage({
     }
 
     setDeletingOfferId(offerId);
-    await onDeleteOffer?.(offerId);
-    setDeletingOfferId(null);
+    try {
+      await onDeleteOffer?.(offerId);
+    } finally {
+      setDeletingOfferId(null);
+    }
   };
 
   return (
-    <section className="page-block">
-      <div className="section-header-block">
+    <section className={role === 'association' ? 'page-block association-theme association-offers-shell' : 'page-block'}>
+      <div className={role === 'association' ? 'section-header-block offers-header association-offers-header' : 'section-header-block offers-header'}>
         <p className="kicker">BENEVOLAT</p>
-        <h2>Offres de benevolat</h2>
-        <p>{filtered.length} missions disponibles</p>
         {isAuthenticated && role === 'association' && (
-          <button className="solid" type="button" onClick={() => setShowCreateModal(true)}>
-            + Creer une offre
-          </button>
-        )}
-      </div>
-
-      <div className="search card">
-        <form
-          className="search-form"
-          onSubmit={(e) => {
-            e.preventDefault();
-            onLoadOffers(city);
-          }}
-        >
-          <input value={city} onChange={(e) => setCity(e.target.value)} placeholder="Ville ou code postal" />
-          <button type="submit">Rechercher</button>
-        </form>
-      </div>
-
-      <div className="chips-row split">
-        <div className="chips-inline">
-          {chips.map((chip) => (
-            <button
-              key={chip}
-              className={chip === activeChip ? 'chip active' : 'chip'}
-              onClick={() => setActiveChip(chip)}
-            >
-              {chip}
+          <div className="offers-header-actions">
+            <button className="solid" type="button" onClick={() => setShowCreateModal(true)}>
+              + Creer une offre
             </button>
-          ))}
-        </div>
-        <button className={urgentOnly ? 'chip active' : 'chip'} onClick={() => setUrgentOnly((v) => !v)}>
-          Urgents uniquement
-        </button>
+          </div>
+        )}
+        <h2>{role === 'association' ? 'Mes offres' : 'Offres de benevolat'}</h2>
+        <p>{filtered.length} {role === 'association' ? 'offres publiees' : 'missions disponibles'}</p>
       </div>
+
+      {role !== 'association' && (
+        <>
+          <div className="search card">
+            <form
+              className="search-form"
+              onSubmit={(e) => {
+                e.preventDefault();
+                onLoadOffers(city);
+              }}
+            >
+              <input value={city} onChange={(e) => setCity(e.target.value)} placeholder="Ville ou code postal" />
+              <button type="submit">Rechercher</button>
+            </form>
+          </div>
+
+          <div className="chips-row split">
+            <div className="chips-inline">
+              {chips.map((chip) => (
+                <button
+                  key={chip}
+                  className={chip === activeChip ? 'chip active' : 'chip'}
+                  onClick={() => setActiveChip(chip)}
+                >
+                  {chip}
+                </button>
+              ))}
+            </div>
+            <button className={urgentOnly ? 'chip active' : 'chip'} onClick={() => setUrgentOnly((v) => !v)}>
+              Urgents uniquement
+            </button>
+          </div>
+        </>
+      )}
 
       <div className="cards-grid wide">
         {filtered.map((offer) => (
@@ -235,7 +285,7 @@ export default function OffersPage({
             <p className="offer-meta-line">
               Association : {role === 'association'
                 ? 'Votre association'
-                : <Link className="inline-link" to={`/associations/${offer.associationId}`}>{offer.association?.name || 'Association'}</Link>}
+                : <Link className="inline-link association-link" to={`/associations/${offer.associationId}`}>{offer.association?.name || 'Association'}</Link>}
             </p>
             {role === 'user' && (
               <div className="actions-row">
@@ -265,7 +315,7 @@ export default function OffersPage({
                     type="button"
                     onClick={() => setActiveAcceptedOfferId((prev) => (prev === offer.id ? null : offer.id))}
                   >
-                    Acceptees ({(offer.historyUsers || []).length})
+                    Acceptees ({getAcceptedHistoryEntries(offer.historyUsers || []).length})
                   </button>
                   <button
                     className="danger action-link"
@@ -279,7 +329,7 @@ export default function OffersPage({
 
                 {activeAcceptedOfferId === offer.id && (
                   <div className="detail-stack">
-                    {(offer.historyUsers || []).length ? (offer.historyUsers || []).map((entry) => (
+                    {getAcceptedHistoryEntries(offer.historyUsers || []).length ? getAcceptedHistoryEntries(offer.historyUsers || []).map((entry) => (
                       <div className="application-card" key={entry.id}>
                         <div className="offer-head">
                           <span className="badge">{entry.user?.username || 'Benevole'}</span>

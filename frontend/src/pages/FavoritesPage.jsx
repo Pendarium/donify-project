@@ -11,7 +11,7 @@ export default function FavoritesPage({ favorites, onLoadFavorites, onRemoveFavo
       <div className="section-header-block">
         <p className="kicker">MES FAVORIS</p>
         <h2>Offres enregistrees</h2>
-        <p>{favorites.length} offre(s) sauvegardee(s)</p>
+        <p>{favorites.length} offres sauvegardees</p>
       </div>
 
       <div className="cards-grid wide">
@@ -30,10 +30,10 @@ export default function FavoritesPage({ favorites, onLoadFavorites, onRemoveFavo
                 Date : {new Date(offer.startDate).toLocaleDateString('fr-FR')} - Duree : {offer.durationHours || '-'} h
               </small>
               <p className="offer-meta-line">
-                Association : <Link className="inline-link" to={`/associations/${offer.associationId}`}>{offer.association?.name || 'Voir la fiche'}</Link>
+                Association : <Link className="inline-link association-link" to={`/associations/${offer.associationId}`}>{offer.association?.name || 'Voir la fiche'}</Link>
               </p>
               <div className="actions-row">
-                <Link className="solid action-link" to={`/associations/${offer.associationId}`}>Voir l'association</Link>
+                <Link className="solid action-link association-link-button" to={`/associations/${offer.associationId}`}>Voir l'association</Link>
                 <button className="ghost" type="button" onClick={() => onRemoveFavorite?.(offer.id)}>
                   Retirer
                 </button>

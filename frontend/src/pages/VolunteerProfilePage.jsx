@@ -47,7 +47,7 @@ export default function VolunteerProfilePage() {
 
   if (loading) {
     return (
-      <section className="page-block">
+      <section className="page-block association-theme">
         <div className="section-header-block">
           <p className="kicker">BENEVOLE</p>
           <h2>Chargement du profil...</h2>
@@ -58,19 +58,19 @@ export default function VolunteerProfilePage() {
 
   if (error || !profile) {
     return (
-      <section className="page-block">
+      <section className="page-block association-theme">
         <div className="section-header-block">
           <p className="kicker">BENEVOLE</p>
           <h2>Profil indisponible</h2>
           <p>{error || 'Benevole introuvable.'}</p>
         </div>
-        <Link className="ghost action-link back-link" to="/mes-benevoles">Retour a mes benevoles</Link>
+        <Link className="ghost action-link back-link association-link-button" to="/mes-benevoles">Retour a mes benevoles</Link>
       </section>
     );
   }
 
   return (
-    <section className="page-block">
+    <section className="page-block association-theme">
       <div className="section-header-block">
         <p className="kicker">BENEVOLE</p>
         <h2>{profile.username}</h2>
@@ -143,7 +143,7 @@ export default function VolunteerProfilePage() {
         </div>
       </section>
 
-      <Link className="ghost action-link back-link" to="/mes-benevoles">Retour a mes benevoles</Link>
+      <Link className="ghost action-link back-link association-link-button" to="/mes-benevoles">Retour a mes benevoles</Link>
     </section>
   );
 }

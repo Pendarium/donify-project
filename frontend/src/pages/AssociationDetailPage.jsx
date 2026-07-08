@@ -40,7 +40,7 @@ export default function AssociationDetailPage() {
 
   if (loading) {
     return (
-      <section className="page-block detail-shell">
+      <section className="page-block detail-shell association-theme">
         <div className="section-header-block">
           <p className="kicker">ASSOCIATION</p>
           <h2>Chargement de la fiche...</h2>
@@ -51,19 +51,19 @@ export default function AssociationDetailPage() {
 
   if (error || !association) {
     return (
-      <section className="page-block detail-shell">
+      <section className="page-block detail-shell association-theme">
         <div className="section-header-block">
           <p className="kicker">ASSOCIATION</p>
           <h2>Fiche indisponible</h2>
           <p>{error || 'Association introuvable.'}</p>
         </div>
-        <Link className="ghost action-link back-link" to="/associations">Retour a la liste</Link>
+        <Link className="ghost action-link back-link association-link-button" to="/associations">Retour a la liste</Link>
       </section>
     );
   }
 
   return (
-    <section className="page-block detail-shell">
+    <section className="page-block detail-shell association-theme">
       <div className="detail-hero card">
         <div>
           <p className="kicker">ASSOCIATION</p>
@@ -73,7 +73,7 @@ export default function AssociationDetailPage() {
           </p>
           <div className="chips-inline">
             <span className="badge">RNA {association.rnaNumber}</span>
-            <span className="badge">{association.offers?.length || 0} mission(s)</span>
+            <span className="badge">{association.offers?.length || 0} missions</span>
           </div>
         </div>
         <div className="detail-aside">
@@ -110,7 +110,7 @@ export default function AssociationDetailPage() {
                   Date : {new Date(offer.startDate).toLocaleDateString('fr-FR')} - Duree : {offer.durationHours || '-'} h
                 </small>
                 <div className="actions-row">
-                  <Link className="solid action-link" to={`/benevolat?offerId=${offer.id}`}>
+                  <Link className="solid action-link association-link-button" to={`/benevolat?offerId=${offer.id}`}>
                     Voir cette offre
                   </Link>
                 </div>
@@ -120,7 +120,7 @@ export default function AssociationDetailPage() {
         </article>
       </div>
 
-      <Link className="ghost action-link back-link" to="/associations">Retour a la liste des associations</Link>
+      <Link className="ghost action-link back-link association-link-button" to="/associations">Retour a la liste des associations</Link>
     </section>
   );
 }

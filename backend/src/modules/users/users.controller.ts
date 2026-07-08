@@ -42,14 +42,17 @@ export class UsersController {
   }
 
   @Delete('profile')
-  deleteProfile(@Req() req: { user?: { sub?: string } }) {
+  deleteProfile(
+    @Req() req: { user?: { sub?: string } },
+    @Body() body: { confirmationWord?: string },
+  ) {
     const userId = req.user?.sub;
 
     if (!userId) {
       return null;
     }
 
-    return this.usersService.deleteAccount(userId);
+    return this.usersService.deleteAccount(userId, body?.confirmationWord);
   }
 
   @Get('volunteers/:id')
@@ -151,6 +154,22 @@ export class UsersController {
     return this.usersService.validateVolunteerApplication(userId, applicationId, body?.note);
   }
 
+  @Post('applications/:applicationId/reject')
+  @Roles('association')
+  rejectApplication(
+    @Param('applicationId') applicationId: string,
+    @Req() req: { user?: { sub?: string } },
+    @Body() body: { reason?: string },
+  ) {
+    const userId = req.user?.sub;
+
+    if (!userId) {
+      return null;
+    }
+
+    return this.usersService.rejectVolunteerApplication(userId, applicationId, body?.reason);
+  }
+
   @Post('applications/:offerId')
   @Roles('user', 'admin')
   addApplication(
@@ -235,6 +254,22 @@ export class UsersController {
     }
 
     return this.usersService.addVolunteerHistoryEntry(userId, offerId, body?.note);
+  }
+
+  @Post('history/:historyEntryId/cancel')
+  @Roles('user', 'admin')
+  cancelMission(
+    @Param('historyEntryId') historyEntryId: string,
+    @Req() req: { user?: { sub?: string } },
+    @Body() body: { reason?: string },
+  ) {
+    const userId = req.user?.sub;
+
+    if (!userId) {
+      return null;
+    }
+
+    return this.usersService.cancelVolunteerMission(userId, historyEntryId, body?.reason);
   }
 
   @Get(':id')

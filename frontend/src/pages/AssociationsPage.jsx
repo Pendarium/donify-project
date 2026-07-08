@@ -32,7 +32,7 @@ export default function AssociationsPage({ associations, onLoadAssociations }) {
   }, [associations, query, activeChip]);
 
   return (
-    <section className="page-block">
+    <section className="page-block association-theme">
       <div className="section-header-block">
         <p className="kicker">ASSOCIATIONS</p>
         <h2>Trouvez votre association</h2>
@@ -71,7 +71,7 @@ export default function AssociationsPage({ associations, onLoadAssociations }) {
           <article className="association-card" key={a.id}>
             <div className="association-head">
               <h3>
-                <Link className="association-title-link" to={`/associations/${a.id}`}>
+                <Link className="association-title-link association-link" to={`/associations/${a.id}`}>
                   {a.name}
                 </Link>
               </h3>
@@ -79,7 +79,7 @@ export default function AssociationsPage({ associations, onLoadAssociations }) {
             <p>{a.description || 'Association engagee localement.'}</p>
             <small>{a.address}</small>
             <div className="actions-row">
-              <Link className="ghost action-link" to={`/associations/${a.id}`}>Voir les missions</Link>
+              <Link className="ghost action-link association-link-button" to={`/associations/${a.id}`}>Voir les missions</Link>
             </div>
           </article>
         ))}

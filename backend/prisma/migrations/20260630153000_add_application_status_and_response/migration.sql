@@ -1,0 +1,2 @@
+-- Restored placeholder migration file.
+-- This migration had no SQL changes in repository state.
