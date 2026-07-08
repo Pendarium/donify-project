@@ -805,6 +805,30 @@ form button {
   padding: 20px;
 }
 
+.association-public-card {
+  border-color: #f3c2cf;
+  background: linear-gradient(140deg, #fff4f7 0%, #ffeef2 55%, #fff8fa 100%);
+}
+
+.association-public-card .profile-grid div {
+  border-color: #f1c6d2;
+  background: linear-gradient(180deg, #fff7fa 0%, #fff1f5 100%);
+}
+
+.association-public-card .profile-label {
+  color: #a4576b;
+}
+
+.association-public-card input,
+.association-public-card textarea {
+  background: rgba(255, 255, 255, 0.92);
+  border-color: #edbcc9;
+}
+
+.association-public-card p {
+  color: #7d5b66;
+}
+
 .association-panel h3 {
   margin-top: 0;
 }
@@ -876,6 +900,11 @@ body.role-association .association-theme .offer-card,
 body.role-association .association-theme .application-card {
   border-color: #f4ccd7;
   background: linear-gradient(180deg, #fff8fa 0%, #fff2ed 100%);
+}
+
+body.role-association .association-offers-shell .offer-card {
+  border-color: #efc2cf;
+  background: linear-gradient(165deg, #ffeef4 0%, #ffe3d9 100%);
 }
 
 body.role-association .association-theme .search.card,
@@ -1492,6 +1521,10 @@ body.role-association .profile-card .profile-grid p {
   background: #d9e3e5;
 }
 
+body.role-association .site-footer {
+  background: #f6d6df;
+}
+
 .site-footer-inner {
   max-width: 1560px;
   margin: 0 auto;
@@ -1506,6 +1539,10 @@ body.role-association .profile-card .profile-grid p {
   margin: 0;
   color: #40656e;
   font-weight: 800;
+}
+
+body.role-association .site-footer-inner p {
+  color: #8a4b5e;
 }
 
 @media (hover: hover) and (pointer: fine) {

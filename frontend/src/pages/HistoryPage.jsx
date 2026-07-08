@@ -3,6 +3,24 @@ import { Link } from 'react-router-dom';
 
 const weekdayLabels = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
 
+function extractRejectedHistoryReason(note) {
+  const prefix = '__REJECTED_HISTORY__:';
+  if (!note || !note.startsWith(prefix)) {
+    return null;
+  }
+
+  return note.slice(prefix.length).trim() || 'Candidature refusee.';
+}
+
+function extractCancelledHistoryReason(note) {
+  const prefix = '__CANCELLED_BY_VOLUNTEER__:';
+  if (!note || !note.startsWith(prefix)) {
+    return null;
+  }
+
+  return note.slice(prefix.length).trim() || 'Mission annulee par le benevole.';
+}
+
 function formatDate(value) {
   if (!value) return '-';
   return new Date(value).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' });
@@ -18,7 +36,7 @@ function toDateKey(value) {
   return `${y}-${m}-${d}`;
 }
 
-export default function HistoryPage({ history, bookings = [], onLoadHistory, onLoadBookings, onCreateBooking, onDeleteBooking }) {
+export default function HistoryPage({ history, applications = [], bookings = [], onLoadHistory, onLoadApplications, onLoadBookings, onCreateBooking, onDeleteBooking }) {
   const [titleDraft, setTitleDraft] = useState('');
   const [noteDraft, setNoteDraft] = useState('');
   const [currentMonth, setCurrentMonth] = useState(() => {
@@ -29,33 +47,75 @@ export default function HistoryPage({ history, bookings = [], onLoadHistory, onL
 
   useEffect(() => {
     onLoadHistory?.();
+    onLoadApplications?.();
     onLoadBookings?.();
   }, []);
 
   const historyEvents = useMemo(() => (
     history.map((entry) => {
       const offer = entry.offer;
+      const rejectionReason = extractRejectedHistoryReason(entry.note);
+      const cancellationReason = extractCancelledHistoryReason(entry.note);
+      const status = rejectionReason ? 'Refusee' : cancellationReason ? 'Annulee' : 'Validee';
+
       return {
         id: entry.id,
         dateKey: toDateKey(offer?.startDate || entry.completedAt),
         title: offer?.title || 'Mission benevole',
         location: offer?.location || '-',
         completedAt: entry.completedAt,
-        note: entry.note,
+        note: rejectionReason || cancellationReason || entry.note,
+        status,
+        offerDeleted: Boolean(offer?.deletedAt),
         associationId: offer?.associationId,
         associationName: offer?.association?.name || 'Voir la fiche',
       };
     })
   ), [history]);
 
+  const pendingApplicationEvents = useMemo(() => (
+    applications
+      .filter((application) => application.status === 'pending' && !application.offer?.deletedAt)
+      .map((application) => ({
+        id: `application-${application.id}`,
+        dateKey: toDateKey(application.offer?.startDate || application.createdAt),
+        title: application.offer?.title || 'Mission benevole',
+        location: application.offer?.location || '-',
+        completedAt: application.createdAt,
+        note: application.message,
+        status: 'En attente',
+        offerDeleted: false,
+        associationId: application.offer?.associationId,
+        associationName: application.offer?.association?.name || 'Voir la fiche',
+      }))
+  ), [applications]);
+
+  const validatedEvents = useMemo(
+    () => historyEvents.filter((event) => event.status === 'Validee' && !event.offerDeleted),
+    [historyEvents],
+  );
+
+  const calendarEvents = useMemo(
+    () => [...validatedEvents, ...pendingApplicationEvents],
+    [validatedEvents, pendingApplicationEvents],
+  );
+
   const historyCountByDay = useMemo(() => {
     const map = new Map();
-    historyEvents.forEach((event) => {
+    calendarEvents.forEach((event) => {
       if (!event.dateKey) return;
-      map.set(event.dateKey, (map.get(event.dateKey) || 0) + 1);
+
+      if (!map.has(event.dateKey)) {
+        map.set(event.dateKey, { validees: 0, enAttente: 0, total: 0 });
+      }
+
+      const day = map.get(event.dateKey);
+      day.total += 1;
+      if (event.status === 'Validee') day.validees += 1;
+      if (event.status === 'En attente') day.enAttente += 1;
     });
     return map;
-  }, [historyEvents]);
+  }, [calendarEvents]);
 
   const normalizedBookings = useMemo(() => (
     bookings.map((item) => ({
@@ -101,7 +161,7 @@ export default function HistoryPage({ history, bookings = [], onLoadHistory, onL
     return cells;
   }, [currentMonth]);
 
-  const selectedHistoryEvents = historyEvents.filter((event) => event.dateKey === selectedDateKey);
+  const selectedHistoryEvents = calendarEvents.filter((event) => event.dateKey === selectedDateKey);
   const selectedBookings = normalizedBookings.filter((event) => event.dateKey === selectedDateKey);
 
   const selectedDateLabel = selectedDateKey
@@ -137,7 +197,7 @@ export default function HistoryPage({ history, bookings = [], onLoadHistory, onL
       <div className="section-header-block">
         <p className="kicker">CALENDRIER</p>
         <h2>Planning benevole</h2>
-        <p>{history.length} mission(s) validee(s) et {bookings.length} reservation(s) perso</p>
+        <p>{validatedEvents.length} missions validees - {pendingApplicationEvents.length} en attente - {bookings.length} reservations perso</p>
       </div>
 
       <div className="history-calendar-shell">
@@ -154,7 +214,7 @@ export default function HistoryPage({ history, bookings = [], onLoadHistory, onL
 
           <div className="history-calendar-grid">
             {calendarDays.map((day) => {
-              const dayHistoryCount = historyCountByDay.get(day.dateKey) || 0;
+              const dayHistoryCount = historyCountByDay.get(day.dateKey) || { validees: 0, enAttente: 0, total: 0 };
               const dayBookingCount = bookingCountByDay.get(day.dateKey) || 0;
               const isSelected = selectedDateKey === day.dateKey;
 
@@ -172,7 +232,8 @@ export default function HistoryPage({ history, bookings = [], onLoadHistory, onL
                 >
                   <strong>{day.date.getDate()}</strong>
                   <div className="history-calendar-day-meta">
-                    {dayHistoryCount > 0 && <span className="badge">Validees: {dayHistoryCount}</span>}
+                    {dayHistoryCount.validees > 0 && <span className="badge">Validees: {dayHistoryCount.validees}</span>}
+                    {dayHistoryCount.enAttente > 0 && <span className="badge warning">En attente: {dayHistoryCount.enAttente}</span>}
                     {dayBookingCount > 0 && <span className="badge">Reservations : {dayBookingCount}</span>}
                   </div>
                 </button>
@@ -185,18 +246,18 @@ export default function HistoryPage({ history, bookings = [], onLoadHistory, onL
           <h3>{selectedDateLabel}</h3>
 
           <div className="detail-stack">
-            <h4>Missions validees</h4>
+            <h4>Missions validees et en attente</h4>
             {selectedHistoryEvents.length ? selectedHistoryEvents.map((event) => (
               <div className="application-card" key={event.id}>
                 <div className="offer-head">
                   <span className="badge">{event.location}</span>
-                  <span className="badge">Validee le {formatDate(event.completedAt)}</span>
+                  <span className={`badge ${event.status === 'Validee' ? 'success' : 'warning'}`}>{event.status} le {formatDate(event.completedAt)}</span>
                 </div>
                 <p>{event.title}</p>
                 {event.note && <p className="history-note">Note: {event.note}</p>}
                 <Link className="inline-link" to={`/associations/${event.associationId}`}>{event.associationName}</Link>
               </div>
-            )) : <p className="muted">Aucune mission validee ce jour.</p>}
+            )) : <p className="muted">Aucune mission validee ou en attente ce jour.</p>}
           </div>
 
           <div className="detail-stack">
@@ -233,7 +294,7 @@ export default function HistoryPage({ history, bookings = [], onLoadHistory, onL
         </article>
       </div>
 
-      {history.length === 0 && (
+      {validatedEvents.length === 0 && (
         <article className="offer-card empty-state-card" style={{ marginTop: '16px' }}>
           <h3>Pas encore de missions validees</h3>
           <p>Quand une association valide votre participation, elle apparaitra automatiquement dans ce calendrier.</p>

@@ -73,7 +73,7 @@ export default function AssociationDetailPage() {
           </p>
           <div className="chips-inline">
             <span className="badge">RNA {association.rnaNumber}</span>
-            <span className="badge">{association.offers?.length || 0} mission(s)</span>
+            <span className="badge">{association.offers?.length || 0} missions</span>
           </div>
         </div>
         <div className="detail-aside">

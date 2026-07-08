@@ -9,10 +9,13 @@ function formatDate(dateValue) {
 }
 
 export default function ProfilePage({ profile, onLoadProfile, onSaveProfile, onDeleteAccount }) {
+  const DELETE_CONFIRMATION_WORD = 'SUPPRIME';
   const [isEditing, setIsEditing] = useState(false);
   const [associationTab, setAssociationTab] = useState('infos');
   const [isEditingAssociation, setIsEditingAssociation] = useState(false);
   const [isDeletingAccount, setIsDeletingAccount] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteConfirmationInput, setDeleteConfirmationInput] = useState('');
   const [associationForm, setAssociationForm] = useState({
     name: '',
     description: '',
@@ -85,28 +88,96 @@ export default function ProfilePage({ profile, onLoadProfile, onSaveProfile, onD
     return trimmed.length > 0 ? trimmed : undefined;
   };
 
+  const openDeleteModal = () => {
+    if (isDeletingAccount) {
+      return;
+    }
+
+    setDeleteConfirmationInput('');
+    setShowDeleteModal(true);
+  };
+
+  const closeDeleteModal = () => {
+    if (isDeletingAccount) {
+      return;
+    }
+
+    setShowDeleteModal(false);
+    setDeleteConfirmationInput('');
+  };
+
   const handleDeleteAccount = async () => {
     if (isDeletingAccount) {
       return;
     }
 
-    const confirmed = window.confirm('Cette action est irreversible. Voulez-vous vraiment supprimer votre compte ?');
-    if (!confirmed) {
+    if (deleteConfirmationInput.trim().toUpperCase() !== DELETE_CONFIRMATION_WORD) {
       return;
     }
 
     try {
       setIsDeletingAccount(true);
-      await onDeleteAccount();
+      await onDeleteAccount(deleteConfirmationInput);
+      closeDeleteModal();
     } finally {
       setIsDeletingAccount(false);
     }
   };
 
+  const deleteModal = showDeleteModal ? (
+    <div className="modal-backdrop" role="presentation" onClick={closeDeleteModal}>
+      <div
+        className="modal-card card"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="delete-account-modal-title"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="modal-header">
+          <div>
+            <p className="kicker">SUPPRESSION COMPTE</p>
+            <h3 id="delete-account-modal-title">Confirmer la suppression</h3>
+          </div>
+          <button className="ghost modal-close" type="button" onClick={closeDeleteModal} disabled={Boolean(isDeletingAccount)}>
+            Fermer
+          </button>
+        </div>
+
+        <p className="modal-copy">
+          Cette action est irreversible. Saisissez le mot <strong>{DELETE_CONFIRMATION_WORD}</strong> pour confirmer.
+        </p>
+
+        <input
+          value={deleteConfirmationInput}
+          onChange={(e) => setDeleteConfirmationInput(e.target.value)}
+          placeholder={`Tapez ${DELETE_CONFIRMATION_WORD}`}
+          autoFocus
+        />
+
+        <div className="modal-footer">
+          <div className="modal-actions">
+            <button className="ghost" type="button" onClick={closeDeleteModal} disabled={Boolean(isDeletingAccount)}>
+              Annuler
+            </button>
+            <button
+              className="danger"
+              type="button"
+              onClick={handleDeleteAccount}
+              disabled={Boolean(isDeletingAccount) || deleteConfirmationInput.trim().toUpperCase() !== DELETE_CONFIRMATION_WORD}
+            >
+              {isDeletingAccount ? 'Suppression...' : 'Supprimer definitivement'}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  ) : null;
+
   if (profile?.role === 'association') {
     const volunteerReviews = managedAssociation?.userReviewsAuthored ?? [];
     const associationOffers = managedAssociation?.offers ?? [];
-    const volunteerApplications = associationOffers.flatMap((offer) => (
+    const activeAssociationOffers = associationOffers.filter((offer) => !offer?.deletedAt);
+    const volunteerApplications = activeAssociationOffers.flatMap((offer) => (
       (offer.applications ?? []).map((application) => ({
         ...application,
         offer,
@@ -115,7 +186,7 @@ export default function ProfilePage({ profile, onLoadProfile, onSaveProfile, onD
 
     const associationTabs = [
       { id: 'infos', label: 'Infos' },
-      { id: 'missions', label: `Missions (${associationOffers.length})` },
+      { id: 'missions', label: `Missions (${activeAssociationOffers.length})` },
       { id: 'demandes', label: `Demandes (${volunteerApplications.length})` },
       { id: 'avis', label: `Avis (${volunteerReviews.length})` },
     ];
@@ -140,7 +211,7 @@ export default function ProfilePage({ profile, onLoadProfile, onSaveProfile, onD
           </div>
           <div className="association-kpis">
             <div className="association-kpi">
-              <strong>{associationOffers.length}</strong>
+              <strong>{activeAssociationOffers.length}</strong>
               <span>Missions actives</span>
             </div>
             <div className="association-kpi">
@@ -169,7 +240,7 @@ export default function ProfilePage({ profile, onLoadProfile, onSaveProfile, onD
 
         {associationTab === 'infos' && (
           <div className="association-profile-grid">
-            <article className="card association-panel">
+            <article className="card association-panel association-public-card">
               <h3>Coordonnees publiques</h3>
               <form
                 className="profile-form"
@@ -249,7 +320,7 @@ export default function ProfilePage({ profile, onLoadProfile, onSaveProfile, onD
                   <button className="solid" type="submit" disabled={!isEditingAssociation}>
                     Enregistrer
                   </button>
-                  <button className="danger" type="button" onClick={handleDeleteAccount} disabled={isDeletingAccount}>
+                  <button className="danger" type="button" onClick={openDeleteModal} disabled={isDeletingAccount}>
                     {isDeletingAccount ? 'Suppression...' : 'Supprimer mon compte'}
                   </button>
                 </div>
@@ -263,7 +334,7 @@ export default function ProfilePage({ profile, onLoadProfile, onSaveProfile, onD
           <article className="card association-panel">
             <h3>Missions publiees</h3>
             <div className="detail-stack">
-              {associationOffers.length ? associationOffers.map((offer) => (
+              {activeAssociationOffers.length ? activeAssociationOffers.map((offer) => (
                 <div className="offer-card compact" key={offer.id}>
                   <div className="offer-head">
                     <h3>{offer.title}</h3>
@@ -318,6 +389,8 @@ export default function ProfilePage({ profile, onLoadProfile, onSaveProfile, onD
             </div>
           </article>
         )}
+
+        {deleteModal}
       </section>
     );
   }
@@ -436,7 +509,7 @@ export default function ProfilePage({ profile, onLoadProfile, onSaveProfile, onD
             <button className="solid" type="submit" disabled={!isEditing || !isDirty}>
               Enregistrer
             </button>
-            <button className="danger" type="button" onClick={handleDeleteAccount} disabled={isDeletingAccount}>
+            <button className="danger" type="button" onClick={openDeleteModal} disabled={isDeletingAccount}>
               {isDeletingAccount ? 'Suppression...' : 'Supprimer mon compte'}
             </button>
           </div>
@@ -469,6 +542,8 @@ export default function ProfilePage({ profile, onLoadProfile, onSaveProfile, onD
           )}
         </div>
       </section>
+
+      {deleteModal}
     </section>
   );
 }

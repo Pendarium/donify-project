@@ -11,7 +11,7 @@ export default function FavoritesPage({ favorites, onLoadFavorites, onRemoveFavo
       <div className="section-header-block">
         <p className="kicker">MES FAVORIS</p>
         <h2>Offres enregistrees</h2>
-        <p>{favorites.length} offre(s) sauvegardee(s)</p>
+        <p>{favorites.length} offres sauvegardees</p>
       </div>
 
       <div className="cards-grid wide">

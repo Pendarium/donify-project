@@ -9,9 +9,11 @@ export class VolunteerOffersService {
     return this.prisma.$transaction(async (tx) => {
       await tx.favoriteOffer.deleteMany({ where: { offerId } });
       await tx.volunteerApplication.deleteMany({ where: { offerId } });
-      await tx.volunteerHistoryEntry.deleteMany({ where: { offerId } });
 
-      return tx.volunteerOffer.delete({ where: { id: offerId } });
+      return tx.volunteerOffer.update({
+        where: { id: offerId },
+        data: { deletedAt: new Date() },
+      });
     });
   }
 
@@ -44,6 +46,7 @@ export class VolunteerOffersService {
     }
 
     const where: Record<string, unknown> = {};
+    where.deletedAt = null;
 
     if (search) {
       where.OR = [
@@ -96,7 +99,7 @@ export class VolunteerOffersService {
       include: { association: true },
     });
 
-    if (!offer) {
+    if (!offer || offer.deletedAt) {
       throw new NotFoundException(`Volunteer offer with id ${id} not found`);
     }
 

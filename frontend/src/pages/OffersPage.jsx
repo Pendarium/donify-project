@@ -3,6 +3,33 @@ import { Link, useSearchParams } from 'react-router-dom';
 
 const chips = ['Toutes', 'Aide alimentaire', 'Aide sociale', 'Education', 'Environnement', 'Seniors'];
 
+function getLocalDateInputValue(date = new Date()) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function parseLocalMissionDate(value) {
+  const [year, month, day] = value.split('-').map(Number);
+  if (!year || !month || !day) {
+    return new Date('invalid');
+  }
+
+  // Use local midday to avoid UTC date shifts around midnight/timezones.
+  return new Date(year, month - 1, day, 12, 0, 0, 0);
+}
+
+const REJECTED_HISTORY_PREFIX = '__REJECTED_HISTORY__:';
+const CANCELLED_HISTORY_PREFIX = '__CANCELLED_BY_VOLUNTEER__:';
+
+function getAcceptedHistoryEntries(historyUsers = []) {
+  return historyUsers.filter((entry) => {
+    const note = entry?.note || '';
+    return !note.startsWith(REJECTED_HISTORY_PREFIX) && !note.startsWith(CANCELLED_HISTORY_PREFIX);
+  });
+}
+
 export default function OffersPage({
   offers,
   onLoadOffers,
@@ -15,7 +42,7 @@ export default function OffersPage({
   onCreateOffer,
   onDeleteOffer,
 }) {
-  const todayIso = new Date().toISOString().split('T')[0];
+  const todayIso = getLocalDateInputValue();
   const [searchParams] = useSearchParams();
   const [city, setCity] = useState(searchParams.get('city') || '');
   const selectedOfferId = searchParams.get('offerId') || '';
@@ -127,7 +154,7 @@ export default function OffersPage({
   };
 
   const handleSubmitCreate = async () => {
-    const startDate = new Date(createDraft.missionDate);
+    const startDate = parseLocalMissionDate(createDraft.missionDate);
     const durationHours = Number(createDraft.durationHours);
     const volunteersNeeded = Number(createDraft.volunteersNeeded);
     const today = new Date();
@@ -172,12 +199,15 @@ export default function OffersPage({
     }
 
     setDeletingOfferId(offerId);
-    await onDeleteOffer?.(offerId);
-    setDeletingOfferId(null);
+    try {
+      await onDeleteOffer?.(offerId);
+    } finally {
+      setDeletingOfferId(null);
+    }
   };
 
   return (
-    <section className="page-block">
+    <section className={role === 'association' ? 'page-block association-theme association-offers-shell' : 'page-block'}>
       <div className={role === 'association' ? 'section-header-block offers-header association-offers-header' : 'section-header-block offers-header'}>
         <p className="kicker">BENEVOLAT</p>
         {isAuthenticated && role === 'association' && (
@@ -188,7 +218,7 @@ export default function OffersPage({
           </div>
         )}
         <h2>{role === 'association' ? 'Mes offres' : 'Offres de benevolat'}</h2>
-        <p>{filtered.length} {role === 'association' ? 'offre(s) publiee(s)' : 'missions disponibles'}</p>
+        <p>{filtered.length} {role === 'association' ? 'offres publiees' : 'missions disponibles'}</p>
       </div>
 
       {role !== 'association' && (
@@ -285,7 +315,7 @@ export default function OffersPage({
                     type="button"
                     onClick={() => setActiveAcceptedOfferId((prev) => (prev === offer.id ? null : offer.id))}
                   >
-                    Acceptees ({(offer.historyUsers || []).length})
+                    Acceptees ({getAcceptedHistoryEntries(offer.historyUsers || []).length})
                   </button>
                   <button
                     className="danger action-link"
@@ -299,7 +329,7 @@ export default function OffersPage({
 
                 {activeAcceptedOfferId === offer.id && (
                   <div className="detail-stack">
-                    {(offer.historyUsers || []).length ? (offer.historyUsers || []).map((entry) => (
+                    {getAcceptedHistoryEntries(offer.historyUsers || []).length ? getAcceptedHistoryEntries(offer.historyUsers || []).map((entry) => (
                       <div className="application-card" key={entry.id}>
                         <div className="offer-head">
                           <span className="badge">{entry.user?.username || 'Benevole'}</span>

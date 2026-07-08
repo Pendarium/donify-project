@@ -101,7 +101,7 @@ export default function App() {
       setToken(data.accessToken);
       setTokenState(data.accessToken);
       setOk('Connexion OK');
-      navigate('/');
+      navigate('/profile');
     } catch (error) {
       setErr(`Connexion KO: ${error.message}`);
     }
@@ -119,10 +119,11 @@ export default function App() {
     navigate('/');
   };
 
-  const handleDeleteAccount = async () => {
+  const handleDeleteAccount = async (confirmationWord) => {
     try {
       await api('/users/profile', {
         method: 'DELETE',
+        body: JSON.stringify({ confirmationWord }),
       });
 
       clearToken();
@@ -192,10 +193,11 @@ export default function App() {
         setProfile(associationProfile || null);
 
         const associationOffers = associationProfile?.managedAssociation?.offers || [];
+        const activeAssociationOffers = associationOffers.filter((offer) => !offer?.deletedAt);
         const normalizedCity = city.trim().toLowerCase();
         const items = normalizedCity
-          ? associationOffers.filter((offer) => (offer.location || '').toLowerCase().includes(normalizedCity))
-          : associationOffers;
+          ? activeAssociationOffers.filter((offer) => (offer.location || '').toLowerCase().includes(normalizedCity))
+          : activeAssociationOffers;
 
         setOffers(items);
         return;
@@ -279,6 +281,21 @@ export default function App() {
     }
   };
 
+  const cancelMission = async (historyEntryId, reason) => {
+    try {
+      await api(`/users/history/${historyEntryId}/cancel`, {
+        method: 'POST',
+        body: JSON.stringify({ reason }),
+      });
+      await loadHistory();
+      await loadOffers();
+      setOk('Mission annulee');
+    } catch (error) {
+      setErr(`Annulation mission KO: ${error.message}`);
+      throw error;
+    }
+  };
+
   const loadApplications = async () => {
     try {
       const data = await api('/users/applications');
@@ -315,6 +332,20 @@ export default function App() {
     }
   };
 
+  const rejectApplicationParticipation = async (applicationId, reason) => {
+    try {
+      await api(`/users/applications/${applicationId}/reject`, {
+        method: 'POST',
+        body: JSON.stringify({ reason }),
+      });
+      await loadOffers();
+      setOk('Candidature refusee');
+    } catch (error) {
+      setErr(`Refus candidature KO: ${error.message}`);
+      throw error;
+    }
+  };
+
   const createOffer = async (offerData) => {
     try {
       const associationId = profile?.managedAssociation?.id;
@@ -338,6 +369,23 @@ export default function App() {
       await api(`/volunteer-offers/${offerId}`, {
         method: 'DELETE',
       });
+
+      // Optimistic UI update: remove the deleted offer immediately from current state.
+      setOffers((prev) => prev.filter((offer) => offer.id !== offerId));
+      setProfile((prev) => {
+        if (!prev?.managedAssociation?.offers) {
+          return prev;
+        }
+
+        return {
+          ...prev,
+          managedAssociation: {
+            ...prev.managedAssociation,
+            offers: prev.managedAssociation.offers.filter((offer) => offer.id !== offerId),
+          },
+        };
+      });
+
       await loadOffers();
       setOk('Offre supprimee');
     } catch (error) {
@@ -382,7 +430,7 @@ export default function App() {
                 role={role}
                 favoriteIds={favorites.map((favorite) => favorite.offerId)}
                 onToggleFavorite={toggleFavorite}
-                applicationIds={applications.map((application) => application.offerId)}
+                applicationIds={applications.filter((application) => application.status !== 'rejected').map((application) => application.offerId)}
                 onSubmitApplication={submitApplication}
                 onCreateOffer={createOffer}
                 onDeleteOffer={deleteOffer}
@@ -401,8 +449,10 @@ export default function App() {
           element={isAuthenticated && role === 'user'
             ? <HistoryPage
               history={history}
+              applications={applications}
               bookings={bookings}
               onLoadHistory={loadHistory}
+              onLoadApplications={loadApplications}
               onLoadBookings={loadBookings}
               onCreateBooking={createBooking}
               onDeleteBooking={deleteBooking}
@@ -415,16 +465,24 @@ export default function App() {
             ? <MyMissionsPage
               history={history}
               favorites={favorites}
+              applications={applications}
               onLoadHistory={loadHistory}
               onLoadFavorites={loadFavorites}
+              onLoadApplications={loadApplications}
               onRemoveFavorite={(offerId) => toggleFavorite(offerId, true)}
+              onCancelMission={cancelMission}
             />
             : <Navigate to="/" replace />}
         />
         <Route
           path="/mes-benevoles"
           element={isAuthenticated && role === 'association'
-            ? <MyVolunteersPage profile={profile} onLoadProfile={loadProfile} onValidateApplication={validateApplicationParticipation} />
+            ? <MyVolunteersPage
+              profile={profile}
+              onLoadProfile={loadProfile}
+              onValidateApplication={validateApplicationParticipation}
+              onRejectApplication={rejectApplicationParticipation}
+            />
             : <Navigate to="/" replace />}
         />
         <Route

@@ -6,7 +6,7 @@ export default function AppLayout({ children, isAuthenticated, role, onGoLogin, 
   return (
     <div className="page">
       <header className="topbar">
-        <Link to="/" className="brand-link">
+        <Link to={isAuthenticated ? '/associations' : '/'} className="brand-link">
           <div className="brand">
             <img
               className="brand-logo"
@@ -24,7 +24,7 @@ export default function AppLayout({ children, isAuthenticated, role, onGoLogin, 
                 Associations
               </NavLink>
               <NavLink to="/benevolat" className={({ isActive }) => (isActive ? 'menu-item active' : 'menu-item')}>
-                Benevolat
+                Missions
               </NavLink>
             </>
           )}
