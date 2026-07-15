@@ -16,7 +16,6 @@ import VolunteerProfilePage from './pages/VolunteerProfilePage';
 
 export default function App() {
   const navigate = useNavigate();
-  const [status, setStatus] = useState({ text: '', error: false });
   const [token, setTokenState] = useState(getToken());
   const [associations, setAssociations] = useState([]);
   const [offers, setOffers] = useState([]);
@@ -53,8 +52,9 @@ export default function App() {
     loadApplications();
   }, [token, role]);
 
-  const setOk = (text) => setStatus({ text, error: false });
-  const setErr = (text) => setStatus({ text, error: true });
+  // Request feedback is intentionally hidden from the UI.
+  const setOk = () => {};
+  const setErr = () => {};
 
   const handleRegister = async (payload) => {
     try {
@@ -402,8 +402,6 @@ export default function App() {
       onGoProfile={() => navigate('/profile')}
       onLogout={handleLogout}
     >
-      {status.text && <div className={`status ${status.error ? 'error' : ''}`}>{status.text}</div>}
-
       <Routes>
         <Route
           path="/"

@@ -12,7 +12,7 @@ function formatDate(value) {
 export default function VolunteerProfilePage() {
   const { volunteerId } = useParams();
   const [profile, setProfile] = useState(null);
-  const [error, setError] = useState('');
+  const [hasError, setHasError] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -20,7 +20,7 @@ export default function VolunteerProfilePage() {
 
     async function loadVolunteer() {
       setLoading(true);
-      setError('');
+      setHasError(false);
 
       try {
         const data = await api(`/users/volunteers/${volunteerId}`);
@@ -29,7 +29,7 @@ export default function VolunteerProfilePage() {
         }
       } catch (loadError) {
         if (active) {
-          setError(loadError.message);
+          setHasError(true);
         }
       } finally {
         if (active) {
@@ -56,13 +56,13 @@ export default function VolunteerProfilePage() {
     );
   }
 
-  if (error || !profile) {
+  if (hasError || !profile) {
     return (
       <section className="page-block association-theme">
         <div className="section-header-block">
           <p className="kicker">BENEVOLE</p>
           <h2>Profil indisponible</h2>
-          <p>{error || 'Benevole introuvable.'}</p>
+          <p>Benevole introuvable.</p>
         </div>
         <Link className="ghost action-link back-link association-link-button" to="/mes-benevoles">Retour a mes benevoles</Link>
       </section>

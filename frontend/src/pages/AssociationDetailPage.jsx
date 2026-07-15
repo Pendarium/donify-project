@@ -5,7 +5,7 @@ import { api } from '../api';
 export default function AssociationDetailPage() {
   const { associationId } = useParams();
   const [association, setAssociation] = useState(null);
-  const [error, setError] = useState('');
+  const [hasError, setHasError] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -13,7 +13,7 @@ export default function AssociationDetailPage() {
 
     async function loadAssociation() {
       setLoading(true);
-      setError('');
+      setHasError(false);
 
       try {
         const data = await api(`/associations/${associationId}`);
@@ -22,7 +22,7 @@ export default function AssociationDetailPage() {
         }
       } catch (loadError) {
         if (active) {
-          setError(loadError.message);
+          setHasError(true);
         }
       } finally {
         if (active) {
@@ -49,13 +49,13 @@ export default function AssociationDetailPage() {
     );
   }
 
-  if (error || !association) {
+  if (hasError || !association) {
     return (
       <section className="page-block detail-shell association-theme">
         <div className="section-header-block">
           <p className="kicker">ASSOCIATION</p>
           <h2>Fiche indisponible</h2>
-          <p>{error || 'Association introuvable.'}</p>
+          <p>Association introuvable.</p>
         </div>
         <Link className="ghost action-link back-link association-link-button" to="/associations">Retour a la liste</Link>
       </section>
